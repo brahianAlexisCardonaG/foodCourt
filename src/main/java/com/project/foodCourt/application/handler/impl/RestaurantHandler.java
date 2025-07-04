@@ -1,4 +1,30 @@
 package com.project.foodCourt.application.handler.impl;
 
-public class RestaurantHandler {
+import com.project.foodCourt.application.dto.request.RestaurantRequestDto;
+import com.project.foodCourt.application.dto.response.RestaurantResponseDto;
+import com.project.foodCourt.application.handler.IRestaurantHandler;
+import com.project.foodCourt.application.mapper.user.IRestaurantRequestMapper;
+import com.project.foodCourt.application.mapper.user.IRestaurantResponseMapper;
+import com.project.foodCourt.domain.api.IRestaurantServicePort;
+import com.project.foodCourt.domain.model.RestaurantModel;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+@Transactional
+public class RestaurantHandler implements IRestaurantHandler {
+
+    private final IRestaurantServicePort iRestaurantServicePort;
+    private final IRestaurantResponseMapper IRestaurantResponseMapper;
+    private final IRestaurantRequestMapper IRestaurantRequestMapper;
+
+    @Override
+    public RestaurantResponseDto createRestaurant(RestaurantRequestDto restaurantRequestDto) {
+        RestaurantModel restaurantModel = IRestaurantRequestMapper.toRestaurantModel(restaurantRequestDto);
+        RestaurantModel restaurantModelCreated = iRestaurantServicePort.createRestaurant(restaurantModel);
+        return IRestaurantResponseMapper
+                .toRestaurantResponseDto(restaurantModelCreated);
+    }
 }
