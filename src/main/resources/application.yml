@@ -1,0 +1,33 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: foodCourt
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/foodcourt
+    username: postgres
+    password: root
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update # o update / validate / create-drop
+    show-sql: true
+
+  logging:
+    level:
+      root: DEBUG
+      org.springframework.web: DEBUG
+      org.hibernate.SQL: DEBUG
+      org.hibernate.type.descriptor.sql: TRACE
+      org.springframework.boot.autoconfigure: ERROR
+
+application:
+  security:
+    jwt:
+      secret-key: m2yrnAnikqppG3cqmTOGXExVuVlLxOvaN5q2Gqwel/aigX+wgP68HvbE1ypcpUBv
+
+appdescription: "API management foodCourt"
+appversion: "1.0.0"
