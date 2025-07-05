@@ -6,14 +6,10 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 @Data
-public class DishRequestDto {
+public class DishUpdateRequestDto {
 
-    @NotBlank(message = "Field name cannot be empty or null.")
-    @Pattern(regexp = "^(?!\\d+$).*$", message = "Name cannot contain only numbers.")
-    private String name;
-
-    @NotNull(message = "Field categoryId cannot be empty or null.")
-    private Long categoryId;
+    @NotNull(message = "Field id cannot be empty or null.")
+    private Long id;
 
     @NotBlank(message = "Field description cannot be empty or null.")
     @Pattern(regexp = "^(?!\\d+$).*$", message = "Name cannot contain only numbers.")
@@ -21,10 +17,4 @@ public class DishRequestDto {
 
     @NotNull(message = "Field price cannot be empty or null.")
     private Float price;
-
-    @NotNull(message = "Field restaurantId cannot be empty or null.")
-    private Long restaurantId;
-
-    @NotBlank(message = "Field imageUrl cannot be empty or null.")
-    private String imageUrl;
 }

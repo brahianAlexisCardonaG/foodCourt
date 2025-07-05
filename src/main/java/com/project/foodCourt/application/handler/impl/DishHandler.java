@@ -1,6 +1,7 @@
 package com.project.foodCourt.application.handler.impl;
 
 import com.project.foodCourt.application.dto.request.DishRequestDto;
+import com.project.foodCourt.application.dto.request.DishUpdateRequestDto;
 import com.project.foodCourt.application.dto.response.DishResponseDto;
 import com.project.foodCourt.application.handler.IDishHandler;
 import com.project.foodCourt.application.mapper.dish.IDishRequestMapper;
@@ -25,5 +26,13 @@ public class DishHandler implements IDishHandler {
         DishModel dishModelCreated = iDishServicePort.createDish(dishModel);
         return iDishResponseMapper
                 .toDishResponseDto(dishModelCreated);
+    }
+
+    @Override
+    public DishResponseDto updateDish(DishUpdateRequestDto dishUpdateRequestDto) {
+        DishModel dishModel = iDishRequestMapper.toDishModelUpdate(dishUpdateRequestDto);
+        DishModel dishModelUpdated = iDishServicePort.updateDish(dishModel);
+        return iDishResponseMapper
+                .toDishResponseDto(dishModelUpdated);
     }
 }

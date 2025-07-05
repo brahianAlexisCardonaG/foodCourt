@@ -1,6 +1,7 @@
 package com.project.foodCourt.infrastructure.input.rest;
 
 import com.project.foodCourt.application.dto.request.DishRequestDto;
+import com.project.foodCourt.application.dto.request.DishUpdateRequestDto;
 import com.project.foodCourt.application.dto.response.DishResponseDto;
 import com.project.foodCourt.application.handler.IDishHandler;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,6 +26,7 @@ class DishRestControllerTest {
     private DishRestController dishRestController;
 
     private DishRequestDto requestDto;
+    private DishUpdateRequestDto updateRequestDto;
     private DishResponseDto responseDto;
 
     @BeforeEach
@@ -35,6 +37,11 @@ class DishRestControllerTest {
         requestDto.setPrice(10.0f);
         requestDto.setRestaurantId(1L);
         requestDto.setImageUrl("http://test.com/image.png");
+
+        updateRequestDto = new DishUpdateRequestDto();
+        updateRequestDto.setId(1L);
+        updateRequestDto.setDescription("Updated Description");
+        updateRequestDto.setPrice(15.0f);
 
         responseDto = new DishResponseDto();
         responseDto.setId(1L);
@@ -61,6 +68,28 @@ class DishRestControllerTest {
         when(dishHandler.createDish(requestDto)).thenReturn(responseDto);
 
         ResponseEntity<DishResponseDto> result = dishRestController.createDish(requestDto);
+
+        assertNotNull(result);
+        assertEquals(responseDto, result.getBody());
+    }
+
+    @Test
+    void updateDish_Success() {
+        when(dishHandler.updateDish(any(DishUpdateRequestDto.class))).thenReturn(responseDto);
+
+        ResponseEntity<DishResponseDto> result = dishRestController.updateDish(updateRequestDto);
+
+        assertNotNull(result);
+        assertEquals(200, result.getStatusCodeValue());
+        assertNotNull(result.getBody());
+        assertEquals(1L, result.getBody().getId());
+    }
+
+    @Test
+    void updateDish_HandlerCalled() {
+        when(dishHandler.updateDish(updateRequestDto)).thenReturn(responseDto);
+
+        ResponseEntity<DishResponseDto> result = dishRestController.updateDish(updateRequestDto);
 
         assertNotNull(result);
         assertEquals(responseDto, result.getBody());

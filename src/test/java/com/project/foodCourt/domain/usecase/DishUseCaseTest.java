@@ -86,4 +86,40 @@ class DishUseCaseTest {
         verify(restaurantPersistencePort).getRestaurantById(1L);
         verify(dishPersistencePort, never()).save(any());
     }
+
+    @Test
+    void updateDish_Success() {
+        DishModel existingDish = new DishModel();
+        existingDish.setId(1L);
+        existingDish.setName("Existing Dish");
+        existingDish.setPrice(5.0f);
+        existingDish.setDescription("Old Description");
+        
+        when(dishPersistencePort.findById(1L)).thenReturn(Optional.of(existingDish));
+        when(dishPersistencePort.save(any(DishModel.class))).thenReturn(existingDish);
+        
+        DishModel updateData = new DishModel();
+        updateData.setId(1L);
+        updateData.setPrice(15.0f);
+        updateData.setDescription("New Description");
+        
+        DishModel result = dishUseCase.updateDish(updateData);
+        
+        assertNotNull(result);
+        assertEquals(15.0f, existingDish.getPrice());
+        assertEquals("New Description", existingDish.getDescription());
+        verify(dishPersistencePort).findById(1L);
+        verify(dishPersistencePort).save(existingDish);
+    }
+
+    @Test
+    void updateDish_DishNotFound() {
+        when(dishPersistencePort.findById(1L)).thenReturn(Optional.empty());
+        doThrow(new BusinessException(ErrorCatalog.DISH_NOT_FOUND))
+            .when(genericValidation).validateCondition(anyBoolean(), eq(ErrorCatalog.DISH_NOT_FOUND));
+        
+        assertThrows(BusinessException.class, () -> dishUseCase.updateDish(dishModel));
+        verify(dishPersistencePort).findById(1L);
+        verify(dishPersistencePort, never()).save(any());
+    }
 }
