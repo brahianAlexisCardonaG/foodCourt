@@ -97,4 +97,24 @@ class RestaurantJpaAdapterTest {
 
         assertFalse(result.isPresent());
     }
+
+    @Test
+    void getRestaurantById_Found() {
+        when(restaurantRepository.findById(1L)).thenReturn(Optional.of(restaurantEntity));
+        when(restaurantEntityMapper.toRestaurantModel(restaurantEntity)).thenReturn(restaurantModel);
+
+        Optional<RestaurantModel> result = restaurantJpaAdapter.getRestaurantById(1L);
+
+        assertTrue(result.isPresent());
+        assertEquals(1L, result.get().getId());
+    }
+
+    @Test
+    void getRestaurantById_NotFound() {
+        when(restaurantRepository.findById(1L)).thenReturn(Optional.empty());
+
+        Optional<RestaurantModel> result = restaurantJpaAdapter.getRestaurantById(1L);
+
+        assertFalse(result.isPresent());
+    }
 }

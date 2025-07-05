@@ -1,4 +1,4 @@
-package com.project.foodCourt.infrastructure.configuration;
+package com.project.foodCourt.infrastructure.configuration.tokensecurity;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -10,9 +10,9 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @RequiredArgsConstructor
 public class ResourceServerConfig {
-    
+
     private final JwtAuthenticationConverter jwtAuthenticationConverter;
-    
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
@@ -21,7 +21,8 @@ public class ResourceServerConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                            .requestMatchers("/api/v1/restaurant/**").hasAuthority("ADMIN")
+                        .requestMatchers("/api/v1/dish/**").hasAuthority("OWNER")
+                        .requestMatchers("/api/v1/restaurant/**").hasAuthority("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2

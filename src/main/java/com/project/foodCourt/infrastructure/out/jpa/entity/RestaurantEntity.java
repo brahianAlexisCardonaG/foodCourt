@@ -1,10 +1,13 @@
 package com.project.foodCourt.infrastructure.out.jpa.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Entity
 @Table(name = "restaurants")
@@ -34,4 +37,8 @@ public class RestaurantEntity {
 
     @Column(name = "nit",nullable = false, length = 50)
     private String nit;
+
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<DishEntity> dishes;
 }

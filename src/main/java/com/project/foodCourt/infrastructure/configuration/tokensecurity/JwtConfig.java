@@ -1,4 +1,4 @@
-package com.project.foodCourt.infrastructure.configuration;
+package com.project.foodCourt.infrastructure.configuration.tokensecurity;
 
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;

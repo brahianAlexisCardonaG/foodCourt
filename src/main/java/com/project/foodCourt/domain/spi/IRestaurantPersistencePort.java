@@ -8,4 +8,5 @@ public interface IRestaurantPersistencePort {
     RestaurantModel save(RestaurantModel restaurantModel);
     Optional<RestaurantModel> getRestaurantByName(String name);
     Optional<RestaurantModel> getRestaurantByNit(String nit);
+    Optional<RestaurantModel> getRestaurantById(Long id);
 }
