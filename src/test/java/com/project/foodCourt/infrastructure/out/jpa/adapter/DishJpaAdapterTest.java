@@ -11,6 +11,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -72,5 +74,49 @@ class DishJpaAdapterTest {
         assertNotNull(result);
         verify(dishEntityMapper).toDishEntity(dishModel);
         verify(dishEntityMapper).toDishModel(dishEntity);
+    }
+
+    @Test
+    void findByName_Found() {
+        when(dishRepository.findByName("Test Dish")).thenReturn(Optional.of(dishEntity));
+        when(dishEntityMapper.toDishModel(dishEntity)).thenReturn(dishModel);
+
+        Optional<DishModel> result = dishJpaAdapter.findByName("Test Dish");
+
+        assertTrue(result.isPresent());
+        assertEquals("Test Dish", result.get().getName());
+        verify(dishRepository).findByName("Test Dish");
+    }
+
+    @Test
+    void findByName_NotFound() {
+        when(dishRepository.findByName("Test Dish")).thenReturn(Optional.empty());
+
+        Optional<DishModel> result = dishJpaAdapter.findByName("Test Dish");
+
+        assertFalse(result.isPresent());
+        verify(dishRepository).findByName("Test Dish");
+    }
+
+    @Test
+    void findById_Found() {
+        when(dishRepository.findById(1L)).thenReturn(Optional.of(dishEntity));
+        when(dishEntityMapper.toDishModel(dishEntity)).thenReturn(dishModel);
+
+        Optional<DishModel> result = dishJpaAdapter.findById(1L);
+
+        assertTrue(result.isPresent());
+        assertEquals(1L, result.get().getId());
+        verify(dishRepository).findById(1L);
+    }
+
+    @Test
+    void findById_NotFound() {
+        when(dishRepository.findById(1L)).thenReturn(Optional.empty());
+
+        Optional<DishModel> result = dishJpaAdapter.findById(1L);
+
+        assertFalse(result.isPresent());
+        verify(dishRepository).findById(1L);
     }
 }

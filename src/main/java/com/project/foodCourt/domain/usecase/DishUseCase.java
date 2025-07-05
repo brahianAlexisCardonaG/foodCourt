@@ -26,9 +26,24 @@ public class DishUseCase implements IDishServicePort {
         Optional<RestaurantModel> restaurantModel = iRestaurantPersistencePort
                 .getRestaurantById(dishModel.getRestaurant().getId());
         genericValidation.validateCondition(restaurantModel.isEmpty(), ErrorCatalog.RESTAURANT_NOT_FOUND);
+        Optional<DishModel> dishModelFound = iDishPersistencePort
+                .findByName(dishModel.getName());
+        genericValidation.validateCondition(dishModelFound.isPresent(), ErrorCatalog.DISH_ALREADY_EXISTS);
         RestaurantBasicModel restaurantBasicModel = restaurantBasicEntityMapper.toRestaurantBasicModel(restaurantModel.get());
         dishModel.setRestaurant(restaurantBasicModel);
         dishModel.setActive(true);
         return iDishPersistencePort.save(dishModel);
+    }
+
+    @Override
+    public DishModel updateDish(DishModel dishModel) {
+        Optional<DishModel> existingDish = iDishPersistencePort
+                .findById(dishModel.getId());
+        genericValidation.validateCondition(existingDish.isEmpty(), ErrorCatalog.DISH_NOT_FOUND);
+        DishModel dishToUpdate = existingDish.get();
+        dishToUpdate.setPrice(dishModel.getPrice());
+        dishToUpdate.setDescription(dishModel.getDescription());
+
+        return iDishPersistencePort.save(dishToUpdate);
     }
 }
