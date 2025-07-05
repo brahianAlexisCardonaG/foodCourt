@@ -1,4 +1,4 @@
-package com.project.foodCourt.infrastructure.configuration;
+package com.project.foodCourt.infrastructure.configuration.tokensecurity;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

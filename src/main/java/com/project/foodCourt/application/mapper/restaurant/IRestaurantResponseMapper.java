@@ -1,4 +1,4 @@
-package com.project.foodCourt.application.mapper.user;
+package com.project.foodCourt.application.mapper.restaurant;
 
 import com.project.foodCourt.application.dto.response.RestaurantResponseDto;
 import com.project.foodCourt.domain.model.RestaurantModel;

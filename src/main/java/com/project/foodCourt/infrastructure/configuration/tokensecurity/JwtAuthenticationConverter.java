@@ -1,4 +1,4 @@
-package com.project.foodCourt.infrastructure.configuration;
+package com.project.foodCourt.infrastructure.configuration.tokensecurity;
 
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
 
 @Component
 public class JwtAuthenticationConverter implements Converter<Jwt, AbstractAuthenticationToken> {
