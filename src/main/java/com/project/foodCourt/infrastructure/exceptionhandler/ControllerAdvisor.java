@@ -1,24 +1,64 @@
 package com.project.foodCourt.infrastructure.exceptionhandler;
 
-import com.project.foodCourt.infrastructure.exception.NoDataFoundException;
+import com.project.foodCourt.domain.exception.BaseException;
+import com.project.foodCourt.utils.ErrorResponse;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.time.LocalDate;
 import java.util.Collections;
-import java.util.Map;
+import java.util.stream.Collectors;
 
-@ControllerAdvice
+import static com.project.foodCourt.utils.ErrorCatalog.*;
+
+@Slf4j
+@RestControllerAdvice
 public class ControllerAdvisor {
 
-    private static final String MESSAGE = "message";
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(BaseException.class)
+    public ErrorResponse handleBaseException(BaseException exception) {
+        return ErrorResponse.builder()
+                .code(exception.getErrorCatalog().getCode())
+                .message(exception.getErrorCatalog().getMessage())
+                .timestamp(LocalDate.now())
+                .build();
+    }
 
-    @ExceptionHandler(NoDataFoundException.class)
-    public ResponseEntity<Map<String, String>> handleNoDataFoundException(
-            NoDataFoundException ignoredNoDataFoundException) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Collections.singletonMap(MESSAGE, ExceptionResponse.NO_DATA_FOUND.getMessage()));
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    //MethodArgumentNotValidException validate the attributes of Dto
+    public ErrorResponse handleMethodArgumentNotValidException(
+            MethodArgumentNotValidException exception) {
+        BindingResult result = exception.getBindingResult();
+
+        return ErrorResponse.builder()
+                .code(INVALID_RESTAURANT.getCode())
+                .message(INVALID_RESTAURANT.getMessage())
+                .details(result.getFieldErrors()
+                        .stream()
+                        .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                        .collect(Collectors.toList()))
+                .timestamp(LocalDate.now())
+                .build();
+    }
+
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(Exception.class)
+    public ErrorResponse handleGenericError(Exception exception) {
+        log.error("Unexpected error occurred", exception);
+        return ErrorResponse.builder()
+                .code(GENERIC_ERROR.getCode())
+                .message(GENERIC_ERROR.getMessage())
+                .details(Collections.singletonList(exception.getMessage()))
+                .timestamp(LocalDate.now())
+                .build();
     }
     
 }
