@@ -44,7 +44,7 @@ public class DishRestController {
         return ResponseEntity.ok(iDishHandler.updateDish(dishUpdateRequestDto));
     }
 
-    @Operation(summary = "Update a Dish")
+    @Operation(summary = "Enable or Disable a Dish")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "dish updated", content = @Content),
     })
