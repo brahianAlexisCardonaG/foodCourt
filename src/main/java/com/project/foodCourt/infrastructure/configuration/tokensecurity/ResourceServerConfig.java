@@ -21,8 +21,12 @@ public class ResourceServerConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/dish/**").hasAuthority("OWNER")
-                        .requestMatchers("/api/v1/restaurant/**").hasAuthority("ADMIN")
+                        .requestMatchers("/api/v1/dish/**")
+                            .hasAuthority("OWNER")
+                        .requestMatchers("/api/v1/restaurant/client-restaurants")
+                            .hasAnyAuthority("ADMIN", "CLIENT", "OWNER", "EMPLOYEE")
+                        .requestMatchers("/api/v1/restaurant/**")
+                            .hasAuthority("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2

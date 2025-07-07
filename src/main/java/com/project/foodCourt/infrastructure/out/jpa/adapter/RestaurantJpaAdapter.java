@@ -6,8 +6,11 @@ import com.project.foodCourt.infrastructure.out.jpa.entity.RestaurantEntity;
 import com.project.foodCourt.infrastructure.out.jpa.mapper.IRestaurantEntityMapper;
 import com.project.foodCourt.infrastructure.out.jpa.repository.IRestaurantRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -40,5 +43,11 @@ public class RestaurantJpaAdapter implements IRestaurantPersistencePort {
     public Optional<RestaurantModel> getRestaurantById(Long id) {
         Optional<RestaurantEntity> restaurantEntity = restaurantRepository.findById(id);
         return restaurantEntity.map(restaurantEntityMapper::toRestaurantModel);
+    }
+
+    @Override
+    public Page<RestaurantModel> getAllRestaurants(Pageable pageable) {
+        Page<RestaurantEntity> restaurantEntities = restaurantRepository.findAll(pageable);
+        return restaurantEntities.map(restaurantEntityMapper::toRestaurantModel);
     }
 }
