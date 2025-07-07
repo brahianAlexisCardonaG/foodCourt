@@ -1,8 +1,9 @@
 package com.project.foodCourt.infrastructure.input.rest;
 
-import com.project.foodCourt.application.dto.request.DishRequestDto;
-import com.project.foodCourt.application.dto.request.DishUpdateRequestDto;
-import com.project.foodCourt.application.dto.response.DishResponseDto;
+import com.project.foodCourt.application.dto.request.dish.DishEnableDisableRequestDto;
+import com.project.foodCourt.application.dto.request.dish.DishRequestDto;
+import com.project.foodCourt.application.dto.request.dish.DishUpdateRequestDto;
+import com.project.foodCourt.application.dto.response.dish.DishResponseDto;
 import com.project.foodCourt.application.handler.IDishHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +28,7 @@ class DishRestControllerTest {
 
     private DishRequestDto requestDto;
     private DishUpdateRequestDto updateRequestDto;
+    private DishEnableDisableRequestDto enableDisableRequestDto;
     private DishResponseDto responseDto;
 
     @BeforeEach
@@ -42,6 +44,11 @@ class DishRestControllerTest {
         updateRequestDto.setId(1L);
         updateRequestDto.setDescription("Updated Description");
         updateRequestDto.setPrice(15.0f);
+
+        enableDisableRequestDto = new DishEnableDisableRequestDto();
+        enableDisableRequestDto.setId(1L);
+        enableDisableRequestDto.setUserId(1L);
+        enableDisableRequestDto.setActive(false);
 
         responseDto = new DishResponseDto();
         responseDto.setId(1L);
@@ -90,6 +97,28 @@ class DishRestControllerTest {
         when(dishHandler.updateDish(updateRequestDto)).thenReturn(responseDto);
 
         ResponseEntity<DishResponseDto> result = dishRestController.updateDish(updateRequestDto);
+
+        assertNotNull(result);
+        assertEquals(responseDto, result.getBody());
+    }
+
+    @Test
+    void enableDisableDish_Success() {
+        when(dishHandler.enableDisableDish(any(DishEnableDisableRequestDto.class))).thenReturn(responseDto);
+
+        ResponseEntity<DishResponseDto> result = dishRestController.enableDisableDish(enableDisableRequestDto);
+
+        assertNotNull(result);
+        assertEquals(200, result.getStatusCodeValue());
+        assertNotNull(result.getBody());
+        assertEquals(1L, result.getBody().getId());
+    }
+
+    @Test
+    void enableDisableDish_HandlerCalled() {
+        when(dishHandler.enableDisableDish(enableDisableRequestDto)).thenReturn(responseDto);
+
+        ResponseEntity<DishResponseDto> result = dishRestController.enableDisableDish(enableDisableRequestDto);
 
         assertNotNull(result);
         assertEquals(responseDto, result.getBody());

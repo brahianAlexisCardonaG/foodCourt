@@ -1,10 +1,9 @@
 package com.project.foodCourt.infrastructure.input.rest;
 
-import com.project.foodCourt.application.dto.request.DishRequestDto;
-import com.project.foodCourt.application.dto.request.DishUpdateRequestDto;
-import com.project.foodCourt.application.dto.request.RestaurantRequestDto;
-import com.project.foodCourt.application.dto.response.DishResponseDto;
-import com.project.foodCourt.application.dto.response.RestaurantResponseDto;
+import com.project.foodCourt.application.dto.request.dish.DishEnableDisableRequestDto;
+import com.project.foodCourt.application.dto.request.dish.DishRequestDto;
+import com.project.foodCourt.application.dto.request.dish.DishUpdateRequestDto;
+import com.project.foodCourt.application.dto.response.dish.DishResponseDto;
 import com.project.foodCourt.application.handler.IDishHandler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -43,5 +42,16 @@ public class DishRestController {
             @Valid @RequestBody DishUpdateRequestDto dishUpdateRequestDto
     ) {
         return ResponseEntity.ok(iDishHandler.updateDish(dishUpdateRequestDto));
+    }
+
+    @Operation(summary = "Update a Dish")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "dish updated", content = @Content),
+    })
+    @PatchMapping("/active")
+    public ResponseEntity<DishResponseDto> enableDisableDish(
+            @Valid @RequestBody DishEnableDisableRequestDto dishEnableDisableRequestDto
+    ) {
+        return ResponseEntity.ok(iDishHandler.enableDisableDish(dishEnableDisableRequestDto));
     }
 }

@@ -13,6 +13,7 @@ public enum ErrorCatalog {
     GENERIC_ERROR("ERR_GEN_001", "An unexpected error occurred."),
     RESTAURANT_ALREADY_EXISTS("ERR_RESTAURANT_003", "The restaurant already exists."),
     RESTAURANT_NOT_FOUND("ERR_RESTAURANT_004", "The restaurant not found."),
+    RESTAURANT_NOT_OWNER("ERR_RESTAURANT_005", "The user is not an owner of the restaurant."),
 
     //dish
     DISH_NOT_FOUND("ERR_DISH_001", "The dish not found."),

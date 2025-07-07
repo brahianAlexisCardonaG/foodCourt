@@ -1,7 +1,7 @@
 package com.project.foodCourt.infrastructure.input.rest;
 
-import com.project.foodCourt.application.dto.request.RestaurantRequestDto;
-import com.project.foodCourt.application.dto.response.RestaurantResponseDto;
+import com.project.foodCourt.application.dto.request.restaurant.RestaurantRequestDto;
+import com.project.foodCourt.application.dto.response.restaurant.RestaurantResponseDto;
 import com.project.foodCourt.application.handler.IRestaurantHandler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

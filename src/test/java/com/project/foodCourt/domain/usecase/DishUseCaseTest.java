@@ -51,6 +51,7 @@ class DishUseCaseTest {
         restaurantBasicModel = new RestaurantBasicModel();
         restaurantBasicModel.setId(1L);
         restaurantBasicModel.setName("Test Restaurant");
+        restaurantBasicModel.setOwnerId(1L);
         
         dishModel = new DishModel();
         dishModel.setId(1L);
@@ -60,6 +61,7 @@ class DishUseCaseTest {
         restaurantModel = new RestaurantModel();
         restaurantModel.setId(1L);
         restaurantModel.setName("Test Restaurant");
+        restaurantModel.setOwnerId(1L);
     }
     
     @Test
@@ -121,5 +123,78 @@ class DishUseCaseTest {
         assertThrows(BusinessException.class, () -> dishUseCase.updateDish(dishModel));
         verify(dishPersistencePort).findById(1L);
         verify(dishPersistencePort, never()).save(any());
+    }
+
+    @Test
+    void disableEnableDish_Success() {
+        DishModel existingDish = new DishModel();
+        existingDish.setId(1L);
+        existingDish.setRestaurant(restaurantBasicModel);
+        existingDish.setActive(true);
+        
+        DishModel requestDish = new DishModel();
+        requestDish.setId(1L);
+        requestDish.setRestaurant(restaurantBasicModel);
+        requestDish.setActive(false);
+        
+        when(dishPersistencePort.findById(1L)).thenReturn(Optional.of(existingDish));
+        when(restaurantPersistencePort.getRestaurantById(1L)).thenReturn(Optional.of(restaurantModel));
+        
+        DishModel result = dishUseCase.disableEnableDish(requestDish);
+        
+        assertNotNull(result);
+        assertFalse(result.getActive());
+        verify(dishPersistencePort).findById(1L);
+        verify(restaurantPersistencePort).getRestaurantById(1L);
+    }
+
+    @Test
+    void disableEnableDish_DishNotFound() {
+        when(dishPersistencePort.findById(1L)).thenReturn(Optional.empty());
+        doThrow(new BusinessException(ErrorCatalog.DISH_NOT_FOUND))
+            .when(genericValidation).validateCondition(anyBoolean(), eq(ErrorCatalog.DISH_NOT_FOUND));
+        
+        assertThrows(BusinessException.class, () -> dishUseCase.disableEnableDish(dishModel));
+        verify(dishPersistencePort).findById(1L);
+    }
+
+    @Test
+    void disableEnableDish_RestaurantNotFound() {
+        DishModel existingDish = new DishModel();
+        existingDish.setId(1L);
+        existingDish.setRestaurant(restaurantBasicModel);
+        
+        when(dishPersistencePort.findById(1L)).thenReturn(Optional.of(existingDish));
+        when(restaurantPersistencePort.getRestaurantById(1L)).thenReturn(Optional.empty());
+        doThrow(new BusinessException(ErrorCatalog.RESTAURANT_NOT_FOUND))
+            .when(genericValidation).validateCondition(anyBoolean(), eq(ErrorCatalog.RESTAURANT_NOT_FOUND));
+        
+        assertThrows(BusinessException.class, () -> dishUseCase.disableEnableDish(dishModel));
+        verify(dishPersistencePort).findById(1L);
+        verify(restaurantPersistencePort).getRestaurantById(1L);
+    }
+
+    @Test
+    void disableEnableDish_NotOwner() {
+        DishModel existingDish = new DishModel();
+        existingDish.setId(1L);
+        existingDish.setRestaurant(restaurantBasicModel);
+        
+        RestaurantBasicModel differentOwnerRestaurant = new RestaurantBasicModel();
+        differentOwnerRestaurant.setId(1L);
+        differentOwnerRestaurant.setOwnerId(2L);
+        
+        DishModel requestDish = new DishModel();
+        requestDish.setId(1L);
+        requestDish.setRestaurant(differentOwnerRestaurant);
+        
+        when(dishPersistencePort.findById(1L)).thenReturn(Optional.of(existingDish));
+        when(restaurantPersistencePort.getRestaurantById(1L)).thenReturn(Optional.of(restaurantModel));
+        doThrow(new BusinessException(ErrorCatalog.RESTAURANT_NOT_OWNER))
+            .when(genericValidation).validateCondition(anyBoolean(), eq(ErrorCatalog.RESTAURANT_NOT_OWNER));
+        
+        assertThrows(BusinessException.class, () -> dishUseCase.disableEnableDish(requestDish));
+        verify(dishPersistencePort).findById(1L);
+        verify(restaurantPersistencePort).getRestaurantById(1L);
     }
 }

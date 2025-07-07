@@ -46,4 +46,20 @@ public class DishUseCase implements IDishServicePort {
 
         return iDishPersistencePort.save(dishToUpdate);
     }
+
+    @Override
+    public DishModel disableEnableDish(DishModel dishModel) {
+        Optional<DishModel> existingDish = iDishPersistencePort
+                .findById(dishModel.getId());
+        genericValidation.validateCondition(existingDish.isEmpty(), ErrorCatalog.DISH_NOT_FOUND);
+        DishModel dishToUpdate = existingDish.get();
+        Optional<RestaurantModel> getRestaurantModel = iRestaurantPersistencePort
+                .getRestaurantById(dishToUpdate.getRestaurant().getId());
+        genericValidation.validateCondition(getRestaurantModel.isEmpty(), ErrorCatalog.RESTAURANT_NOT_FOUND);
+        RestaurantModel restaurantModel = getRestaurantModel.get();
+        genericValidation.validateCondition(!dishModel.getRestaurant().getOwnerId()
+                .equals(restaurantModel.getOwnerId()), ErrorCatalog.RESTAURANT_NOT_OWNER);
+        dishToUpdate.setActive(dishModel.getActive());
+        return dishToUpdate;
+    }
 }

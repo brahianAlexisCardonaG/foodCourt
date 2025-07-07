@@ -1,4 +1,4 @@
-package com.project.foodCourt.application.dto.response;
+package com.project.foodCourt.application.dto.response.restaurant;
 
 import lombok.Data;
 

@@ -1,8 +1,9 @@
 package com.project.foodCourt.application.handler.impl;
 
-import com.project.foodCourt.application.dto.request.DishRequestDto;
-import com.project.foodCourt.application.dto.request.DishUpdateRequestDto;
-import com.project.foodCourt.application.dto.response.DishResponseDto;
+import com.project.foodCourt.application.dto.request.dish.DishEnableDisableRequestDto;
+import com.project.foodCourt.application.dto.request.dish.DishRequestDto;
+import com.project.foodCourt.application.dto.request.dish.DishUpdateRequestDto;
+import com.project.foodCourt.application.dto.response.dish.DishResponseDto;
 import com.project.foodCourt.application.handler.IDishHandler;
 import com.project.foodCourt.application.mapper.dish.IDishRequestMapper;
 import com.project.foodCourt.application.mapper.dish.IDishResponseMapper;
@@ -32,6 +33,14 @@ public class DishHandler implements IDishHandler {
     public DishResponseDto updateDish(DishUpdateRequestDto dishUpdateRequestDto) {
         DishModel dishModel = iDishRequestMapper.toDishModelUpdate(dishUpdateRequestDto);
         DishModel dishModelUpdated = iDishServicePort.updateDish(dishModel);
+        return iDishResponseMapper
+                .toDishResponseDto(dishModelUpdated);
+    }
+
+    @Override
+    public DishResponseDto enableDisableDish(DishEnableDisableRequestDto dishEnableDisableRequestDto) {
+        DishModel dishModel = iDishRequestMapper.toDishModelEnableDisable(dishEnableDisableRequestDto);
+        DishModel dishModelUpdated = iDishServicePort.disableEnableDish(dishModel);
         return iDishResponseMapper
                 .toDishResponseDto(dishModelUpdated);
     }
