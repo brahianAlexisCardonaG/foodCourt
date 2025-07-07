@@ -1,6 +1,6 @@
-package com.project.foodCourt.application.dto.response;
+package com.project.foodCourt.application.dto.response.dish;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.project.foodCourt.application.dto.response.restaurant.RestaurantSummaryDto;
 import lombok.Data;
 
 @Data

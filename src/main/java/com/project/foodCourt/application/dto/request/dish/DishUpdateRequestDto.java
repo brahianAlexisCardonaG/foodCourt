@@ -1,4 +1,4 @@
-package com.project.foodCourt.application.dto.request;
+package com.project.foodCourt.application.dto.request.dish;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

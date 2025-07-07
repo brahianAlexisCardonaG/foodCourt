@@ -1,7 +1,8 @@
 package com.project.foodCourt.application.mapper.dish;
 
-import com.project.foodCourt.application.dto.request.DishRequestDto;
-import com.project.foodCourt.application.dto.request.DishUpdateRequestDto;
+import com.project.foodCourt.application.dto.request.dish.DishEnableDisableRequestDto;
+import com.project.foodCourt.application.dto.request.dish.DishRequestDto;
+import com.project.foodCourt.application.dto.request.dish.DishUpdateRequestDto;
 import com.project.foodCourt.domain.model.DishModel;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -15,4 +16,7 @@ public interface IDishRequestMapper {
     DishModel toDishModel(DishRequestDto dishRequestDto);
 
     DishModel toDishModelUpdate(DishUpdateRequestDto dishUpdateRequestDto);
+
+    @Mapping(source = "userId", target = "restaurant.ownerId")
+    DishModel toDishModelEnableDisable(DishEnableDisableRequestDto dishEnableDisableRequestDto);
 }

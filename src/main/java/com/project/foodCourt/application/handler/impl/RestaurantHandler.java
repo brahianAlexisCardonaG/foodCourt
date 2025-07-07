@@ -1,7 +1,7 @@
 package com.project.foodCourt.application.handler.impl;
 
-import com.project.foodCourt.application.dto.request.RestaurantRequestDto;
-import com.project.foodCourt.application.dto.response.RestaurantResponseDto;
+import com.project.foodCourt.application.dto.request.restaurant.RestaurantRequestDto;
+import com.project.foodCourt.application.dto.response.restaurant.RestaurantResponseDto;
 import com.project.foodCourt.application.handler.IRestaurantHandler;
 import com.project.foodCourt.application.mapper.restaurant.IRestaurantRequestMapper;
 import com.project.foodCourt.application.mapper.restaurant.IRestaurantResponseMapper;

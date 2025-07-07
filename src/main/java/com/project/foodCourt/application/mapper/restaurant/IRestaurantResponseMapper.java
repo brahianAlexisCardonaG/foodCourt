@@ -1,6 +1,6 @@
 package com.project.foodCourt.application.mapper.restaurant;
 
-import com.project.foodCourt.application.dto.response.RestaurantResponseDto;
+import com.project.foodCourt.application.dto.response.restaurant.RestaurantResponseDto;
 import com.project.foodCourt.domain.model.RestaurantModel;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;

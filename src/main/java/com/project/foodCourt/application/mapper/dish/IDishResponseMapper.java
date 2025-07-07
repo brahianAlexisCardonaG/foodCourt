@@ -1,6 +1,6 @@
 package com.project.foodCourt.application.mapper.dish;
 
-import com.project.foodCourt.application.dto.response.DishResponseDto;
+import com.project.foodCourt.application.dto.response.dish.DishResponseDto;
 import com.project.foodCourt.domain.model.DishModel;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
