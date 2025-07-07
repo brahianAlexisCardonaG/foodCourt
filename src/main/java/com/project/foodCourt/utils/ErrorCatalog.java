@@ -18,7 +18,11 @@ public enum ErrorCatalog {
     //dish
     DISH_NOT_FOUND("ERR_DISH_001", "The dish not found."),
     DISH_ALREADY_EXISTS("ERR_DISH_002", "The dish already exists."),
-    INVALID_DISH("ERR_DISH_003", "Invalid dish parameters.");
+    INVALID_DISH("ERR_DISH_003", "Invalid dish parameters."),
+
+    //category
+    CATEGORY_NOT_FOUND("ERR_RESTAURANT_001", "The category not found.")
+    ;
 
     private final String code;
     private final String message;

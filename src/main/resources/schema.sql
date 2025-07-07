@@ -4,6 +4,13 @@ CREATE TABLE categories (
     name VARCHAR(100) NOT NULL,
     description VARCHAR(255)
 );
+
+INSERT INTO categories (name, description) VALUES
+ ('Entradas', 'Platos que se sirven antes de la comida principal'),
+ ('Postres', 'Platos que se sirven después de la comida principal'),
+ ('Bebidas', 'Bebidas que se sirven en la mesa'),
+ ('Platos Principales', 'Platos que se sirven en la mesa');
+
 -- TABLE: RESTAURANTS
 CREATE TABLE restaurants (
     id SERIAL PRIMARY KEY,
