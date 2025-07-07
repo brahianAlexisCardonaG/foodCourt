@@ -12,6 +12,11 @@ import org.springframework.security.web.SecurityFilterChain;
 public class ResourceServerConfig {
 
     private final JwtAuthenticationConverter jwtAuthenticationConverter;
+    private String[] ListAllPermissions =
+            new String[]{
+                    "/api/v1/restaurant/client-restaurants",
+                    "/api/v1/dish/client-dishes-restaurant"
+            };
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -21,12 +26,12 @@ public class ResourceServerConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(ListAllPermissions)
+                        .hasAnyAuthority("ADMIN", "CLIENT", "OWNER", "EMPLOYEE")
                         .requestMatchers("/api/v1/dish/**")
-                            .hasAuthority("OWNER")
-                        .requestMatchers("/api/v1/restaurant/client-restaurants")
-                            .hasAnyAuthority("ADMIN", "CLIENT", "OWNER", "EMPLOYEE")
+                        .hasAuthority("OWNER")
                         .requestMatchers("/api/v1/restaurant/**")
-                            .hasAuthority("ADMIN")
+                        .hasAuthority("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2

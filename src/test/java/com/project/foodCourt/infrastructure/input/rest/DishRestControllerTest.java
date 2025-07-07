@@ -3,8 +3,16 @@ package com.project.foodCourt.infrastructure.input.rest;
 import com.project.foodCourt.application.dto.request.dish.DishEnableDisableRequestDto;
 import com.project.foodCourt.application.dto.request.dish.DishRequestDto;
 import com.project.foodCourt.application.dto.request.dish.DishUpdateRequestDto;
+import com.project.foodCourt.application.dto.response.dish.DishInfoResponseDto;
+import com.project.foodCourt.application.dto.response.dish.DishPageResponseDto;
 import com.project.foodCourt.application.dto.response.dish.DishResponseDto;
 import com.project.foodCourt.application.handler.IDishHandler;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,6 +38,8 @@ class DishRestControllerTest {
     private DishUpdateRequestDto updateRequestDto;
     private DishEnableDisableRequestDto enableDisableRequestDto;
     private DishResponseDto responseDto;
+    private DishInfoResponseDto dishInfoResponseDto;
+    private Pageable pageable;
 
     @BeforeEach
     void setUp() {
@@ -54,6 +64,13 @@ class DishRestControllerTest {
         responseDto.setId(1L);
         responseDto.setName("Test Dish");
         responseDto.setActive(true);
+        
+        dishInfoResponseDto = new DishInfoResponseDto();
+        dishInfoResponseDto.setName("Test Dish");
+        dishInfoResponseDto.setDescription("Test Description");
+        dishInfoResponseDto.setPrice(10.0f);
+        
+        pageable = PageRequest.of(0, 10);
     }
 
     @Test
@@ -122,5 +139,50 @@ class DishRestControllerTest {
 
         assertNotNull(result);
         assertEquals(responseDto, result.getBody());
+    }
+
+    @Test
+    void getAllDishesByRestaurantId_Success_WithoutCategoryFilter() {
+        Page<DishInfoResponseDto> page = new PageImpl<>(List.of(dishInfoResponseDto));
+        
+        when(dishHandler.getAllDishesByRestaurantId(pageable, 1L, null)).thenReturn(page);
+        
+        ResponseEntity<DishPageResponseDto> result = dishRestController.getAllRestaurants(pageable, 1L, null);
+        
+        assertNotNull(result);
+        assertEquals(200, result.getStatusCodeValue());
+        assertNotNull(result.getBody());
+        assertEquals(1, result.getBody().getContent().size());
+        assertEquals(1L, result.getBody().getTotalElements());
+    }
+
+    @Test
+    void getAllDishesByRestaurantId_Success_WithCategoryFilter() {
+        Page<DishInfoResponseDto> page = new PageImpl<>(List.of(dishInfoResponseDto));
+        
+        when(dishHandler.getAllDishesByRestaurantId(pageable, 1L, 1L)).thenReturn(page);
+        
+        ResponseEntity<DishPageResponseDto> result = dishRestController.getAllRestaurants(pageable, 1L, 1L);
+        
+        assertNotNull(result);
+        assertEquals(200, result.getStatusCodeValue());
+        assertNotNull(result.getBody());
+        assertEquals(1, result.getBody().getContent().size());
+        assertEquals(dishInfoResponseDto, result.getBody().getContent().get(0));
+    }
+
+    @Test
+    void getAllDishesByRestaurantId_EmptyResult() {
+        Page<DishInfoResponseDto> emptyPage = new PageImpl<>(List.of());
+        
+        when(dishHandler.getAllDishesByRestaurantId(pageable, 1L, null)).thenReturn(emptyPage);
+        
+        ResponseEntity<DishPageResponseDto> result = dishRestController.getAllRestaurants(pageable, 1L, null);
+        
+        assertNotNull(result);
+        assertEquals(200, result.getStatusCodeValue());
+        assertNotNull(result.getBody());
+        assertTrue(result.getBody().getContent().isEmpty());
+        assertEquals(0L, result.getBody().getTotalElements());
     }
 }

@@ -1,5 +1,6 @@
 package com.project.foodCourt.domain.model;
 
+import com.project.foodCourt.domain.model.modelbasic.CategoryBasicModel;
 import com.project.foodCourt.domain.model.modelbasic.RestaurantBasicModel;
 import lombok.Data;
 
@@ -7,7 +8,7 @@ import lombok.Data;
 public class DishModel {
     private Long id;
     private String name;
-    private Long categoryId;
+    private CategoryBasicModel category;
     private String description;
     private Float price;
     private RestaurantBasicModel restaurant;

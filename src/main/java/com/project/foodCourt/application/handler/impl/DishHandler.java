@@ -3,13 +3,17 @@ package com.project.foodCourt.application.handler.impl;
 import com.project.foodCourt.application.dto.request.dish.DishEnableDisableRequestDto;
 import com.project.foodCourt.application.dto.request.dish.DishRequestDto;
 import com.project.foodCourt.application.dto.request.dish.DishUpdateRequestDto;
+import com.project.foodCourt.application.dto.response.dish.DishInfoResponseDto;
 import com.project.foodCourt.application.dto.response.dish.DishResponseDto;
 import com.project.foodCourt.application.handler.IDishHandler;
 import com.project.foodCourt.application.mapper.dish.IDishRequestMapper;
 import com.project.foodCourt.application.mapper.dish.IDishResponseMapper;
 import com.project.foodCourt.domain.api.IDishServicePort;
 import com.project.foodCourt.domain.model.DishModel;
+import com.project.foodCourt.domain.model.RestaurantModel;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,5 +47,11 @@ public class DishHandler implements IDishHandler {
         DishModel dishModelUpdated = iDishServicePort.disableEnableDish(dishModel);
         return iDishResponseMapper
                 .toDishResponseDto(dishModelUpdated);
+    }
+
+    @Override
+    public Page<DishInfoResponseDto> getAllDishesByRestaurantId(Pageable pageable, Long restaurantId, Long categoryId) {
+        Page<DishModel> dishPage = iDishServicePort.getAllDishesByRestaurantId(pageable, restaurantId, categoryId);
+        return dishPage.map(iDishResponseMapper::toDishInfoResponseDto);
     }
 }
