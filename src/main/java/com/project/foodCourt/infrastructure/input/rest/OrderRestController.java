@@ -1,9 +1,11 @@
 package com.project.foodCourt.infrastructure.input.rest;
 
+import com.project.foodCourt.application.dto.request.dish.DishEnableDisableRequestDto;
 import com.project.foodCourt.application.dto.request.dish.DishRequestDto;
 import com.project.foodCourt.application.dto.request.order.OrderRequestDto;
 import com.project.foodCourt.application.dto.response.dish.DishInfoResponseDto;
 import com.project.foodCourt.application.dto.response.dish.DishPageResponseDto;
+import com.project.foodCourt.application.dto.response.dish.DishResponseDto;
 import com.project.foodCourt.application.dto.response.order.OrderPageResponseDto;
 import com.project.foodCourt.application.dto.response.order.OrderResponseDto;
 import com.project.foodCourt.application.handler.IOrderHandler;
@@ -41,10 +43,10 @@ public class OrderRestController {
     })
     @GetMapping("/employee-orders")
     public ResponseEntity<OrderPageResponseDto> getOrdersByStatus(Pageable pageable,
-                                                                 @RequestParam(required = false) String status) {
-        Page<OrderResponseDto> page = status != null ? 
-            iOrderHandler.getOrdersByStatus(status, pageable) : 
-            iOrderHandler.getAllOrders(pageable);
+                                                                  @RequestParam(required = false) String status) {
+        Page<OrderResponseDto> page = status != null ?
+                iOrderHandler.getOrdersByStatus(status, pageable) :
+                iOrderHandler.getAllOrders(pageable);
         OrderPageResponseDto response = new OrderPageResponseDto(
                 page.getContent(),
                 page.getNumber(),
@@ -52,5 +54,18 @@ public class OrderRestController {
                 page.getTotalElements()
         );
         return ResponseEntity.ok(response);
+    }
+
+
+    @Operation(summary = "assigned Employee to order")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "assigned Employee to order with success", content = @Content),
+    })
+    @PatchMapping("/assigned-employee")
+    public ResponseEntity<OrderResponseDto> assignedEmployeeIdToOrder(
+            @RequestParam Long orderId,
+            @RequestParam Long employeeId
+    ) {
+        return ResponseEntity.ok(iOrderHandler.assignedEmployeeIdToOrder(orderId, employeeId));
     }
 }

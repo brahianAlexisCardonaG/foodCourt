@@ -28,6 +28,7 @@ public interface IOrderEntityMapper {
         orderEntity.setDate(orderModel.getDate());
         orderEntity.setStatus(orderModel.getStatus());
         orderEntity.setChefId(orderModel.getChefId());
+        orderEntity.setAssignedEmployeeId(orderModel.getAssignedEmployeeId());
         
         if (orderModel.getRestaurant() != null) {
             RestaurantEntity restaurant = new RestaurantEntity();

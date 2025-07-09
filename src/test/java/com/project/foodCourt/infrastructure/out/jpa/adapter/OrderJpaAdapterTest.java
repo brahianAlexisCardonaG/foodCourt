@@ -19,6 +19,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -151,5 +152,30 @@ class OrderJpaAdapterTest {
         
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
+    }
+
+    @Test
+    void findById_Success() {
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(orderEntity));
+        when(orderEntityMapper.toOrderModel(orderEntity)).thenReturn(orderModel);
+        
+        Optional<OrderModel> result = orderJpaAdapter.findById(1L);
+        
+        assertTrue(result.isPresent());
+        assertEquals(1L, result.get().getId());
+        assertEquals("PENDIENTE", result.get().getStatus());
+        verify(orderRepository).findById(1L);
+        verify(orderEntityMapper).toOrderModel(orderEntity);
+    }
+    
+    @Test
+    void findById_NotFound() {
+        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+        
+        Optional<OrderModel> result = orderJpaAdapter.findById(1L);
+        
+        assertFalse(result.isPresent());
+        verify(orderRepository).findById(1L);
+        verify(orderEntityMapper, never()).toOrderModel(any());
     }
 }

@@ -222,4 +222,80 @@ class OrderUseCaseTest {
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
     }
+
+    @Test
+    void assignedEmployeeIdToOrder_Success() {
+        RoleResponse employeeRole = new RoleResponse();
+        employeeRole.setName("EMPLOYEE");
+        
+        UserRoleResponse employeeResponse = new UserRoleResponse();
+        employeeResponse.setId(2L);
+        employeeResponse.setFirstName("Employee");
+        employeeResponse.setLastName("Test");
+        employeeResponse.setRole(employeeRole);
+        
+        OrderDishModel orderDishModel = new OrderDishModel();
+        DishBasicModel dishBasic = new DishBasicModel();
+        dishBasic.setId(1L);
+        orderDishModel.setDishes(dishBasic);
+        orderDishModel.setQuantity(2);
+        
+        orderModel.setId(1L);
+        
+        when(orderPersistencePort.findById(1L)).thenReturn(Optional.of(orderModel));
+        when(userWebClientPort.getUserById(2L)).thenReturn(employeeResponse);
+        when(userWebClientPort.getUserById(1L)).thenReturn(userRoleResponse);
+        when(restaurantPersistencePort.getRestaurantById(1L)).thenReturn(Optional.of(restaurantModel));
+        when(orderDishPersistencePort.findByOrderId(1L)).thenReturn(List.of(orderDishModel));
+        when(dishPersistencePort.findByIds(List.of(1L))).thenReturn(List.of(dishModel));
+        when(orderPersistencePort.save(any(OrderModel.class))).thenReturn(orderModel);
+        
+        OrderResponseModel result = orderUseCase.assignedEmployeeIdToOrder(1L, 2L);
+        
+        assertNotNull(result);
+        assertEquals("Employee Test", result.getAssignedEmployee());
+        verify(orderPersistencePort).save(any(OrderModel.class));
+    }
+    
+    @Test
+    void assignedEmployeeIdToOrder_OrderNotFound() {
+        when(orderPersistencePort.findById(1L)).thenReturn(Optional.empty());
+        doThrow(new BusinessException(ErrorCatalog.ORDER_NOT_FOUND))
+            .when(genericValidation).validateCondition(eq(true), eq(ErrorCatalog.ORDER_NOT_FOUND));
+        
+        assertThrows(BusinessException.class, () -> orderUseCase.assignedEmployeeIdToOrder(1L, 2L));
+        verify(orderPersistencePort).findById(1L);
+    }
+    
+    @Test
+    void assignedEmployeeIdToOrder_EmployeeNotFound() {
+        orderModel.setId(1L);
+        
+        when(orderPersistencePort.findById(1L)).thenReturn(Optional.of(orderModel));
+        when(userWebClientPort.getUserById(2L)).thenReturn(null);
+        doThrow(new BusinessException(ErrorCatalog.USER_NOT_FOUND))
+            .when(genericValidation).validateCondition(eq(true), eq(ErrorCatalog.USER_NOT_FOUND));
+        
+        assertThrows(BusinessException.class, () -> orderUseCase.assignedEmployeeIdToOrder(1L, 2L));
+        verify(userWebClientPort).getUserById(2L);
+    }
+    
+    @Test
+    void assignedEmployeeIdToOrder_UserNotEmployee() {
+        RoleResponse clientRole = new RoleResponse();
+        clientRole.setName("CLIENT");
+        
+        UserRoleResponse nonEmployeeResponse = new UserRoleResponse();
+        nonEmployeeResponse.setId(2L);
+        nonEmployeeResponse.setRole(clientRole);
+        
+        orderModel.setId(1L);
+        
+        when(orderPersistencePort.findById(1L)).thenReturn(Optional.of(orderModel));
+        when(userWebClientPort.getUserById(2L)).thenReturn(nonEmployeeResponse);
+        doThrow(new BusinessException(ErrorCatalog.USER_NOT_EMPLOYEE))
+            .when(genericValidation).validateCondition(eq(true), eq(ErrorCatalog.USER_NOT_EMPLOYEE));
+        
+        assertThrows(BusinessException.class, () -> orderUseCase.assignedEmployeeIdToOrder(1L, 2L));
+    }
 }

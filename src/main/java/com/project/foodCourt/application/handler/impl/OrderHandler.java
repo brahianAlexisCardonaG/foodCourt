@@ -41,4 +41,11 @@ public class OrderHandler implements IOrderHandler {
         Page<OrderResponseModel> orderPage = iOrderServicePort.getAllOrders(pageable);
         return orderPage.map(iOrderResponseMapper::toOrderResponseDto);
     }
+
+    @Override
+    public OrderResponseDto assignedEmployeeIdToOrder(Long orderId, Long employeeId) {
+        OrderResponseModel orderResponseModel = iOrderServicePort
+                .assignedEmployeeIdToOrder(orderId, employeeId);
+        return iOrderResponseMapper.toOrderResponseDto(orderResponseModel);
+    }
 }

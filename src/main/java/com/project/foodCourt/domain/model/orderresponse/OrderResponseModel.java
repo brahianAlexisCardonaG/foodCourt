@@ -11,5 +11,6 @@ public class OrderResponseModel {
     private LocalDate date;
     private String status;
     private String nameRestaurant;
+    private String assignedEmployee;
     private List<OrderDishResponseModel> orderDishes;
 }

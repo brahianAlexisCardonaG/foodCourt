@@ -10,4 +10,5 @@ public class OrderBasicModel {
     private LocalDate date;
     private String status;
     private Long chefId;
+    private Long assignedEmployeeId;
 }
