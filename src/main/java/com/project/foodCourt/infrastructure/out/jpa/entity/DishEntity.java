@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Entity
 @Table(name = "dishes")
 @Data
@@ -39,4 +41,7 @@ public class DishEntity {
     @ManyToOne
     @JoinColumn(name = "category_id")
     private CategoryEntity category;
+
+    @OneToMany(mappedBy = "dishes", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderDishEntity> orderDishes;
 }

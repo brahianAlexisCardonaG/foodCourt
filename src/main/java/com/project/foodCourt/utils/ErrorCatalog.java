@@ -21,7 +21,11 @@ public enum ErrorCatalog {
     INVALID_DISH("ERR_DISH_003", "Invalid dish parameters."),
 
     //category
-    CATEGORY_NOT_FOUND("ERR_RESTAURANT_001", "The category not found.")
+    CATEGORY_NOT_FOUND("ERR_RESTAURANT_001", "The category not found."),
+    
+    //order
+    CLIENT_HAS_ACTIVE_ORDER("ERR_ORDER_001", "Client has an active order in process."),
+    DISH_NOT_FROM_RESTAURANT("ERR_ORDER_002", "Dish does not belong to the specified restaurant.")
     ;
 
     private final String code;

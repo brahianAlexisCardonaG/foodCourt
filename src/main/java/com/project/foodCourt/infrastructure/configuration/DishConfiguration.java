@@ -6,7 +6,7 @@ import com.project.foodCourt.domain.model.modelbasic.mapper.IRestaurantBasicMode
 import com.project.foodCourt.domain.spi.ICategoryPersistencePort;
 import com.project.foodCourt.domain.spi.IDishPersistencePort;
 import com.project.foodCourt.domain.spi.IRestaurantPersistencePort;
-import com.project.foodCourt.domain.usecase.DishUseCase;
+import com.project.foodCourt.domain.usecase.dish.DishUseCase;
 import com.project.foodCourt.utils.GenericValidation;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

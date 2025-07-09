@@ -6,6 +6,7 @@ import com.project.foodCourt.domain.model.feignclient.RoleResponse;
 import com.project.foodCourt.domain.model.feignclient.UserRoleResponse;
 import com.project.foodCourt.domain.spi.IRestaurantPersistencePort;
 import com.project.foodCourt.domain.spi.IUserWebClientPort;
+import com.project.foodCourt.domain.usecase.restaurant.RestaurantUseCase;
 import com.project.foodCourt.utils.ErrorCatalog;
 import com.project.foodCourt.utils.GenericValidation;
 import org.junit.jupiter.api.BeforeEach;
