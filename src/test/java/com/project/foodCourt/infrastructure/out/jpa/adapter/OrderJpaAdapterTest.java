@@ -14,6 +14,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 
@@ -123,5 +126,30 @@ class OrderJpaAdapterTest {
         
         assertNotNull(result);
         assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void findOrdersByStatus_Success() {
+        when(orderRepository.findByStatus("PENDIENTE", PageRequest.of(0, 10)))
+            .thenReturn(new PageImpl<>(List.of(orderEntity)));
+        when(orderEntityMapper.toOrderModel(orderEntity)).thenReturn(orderModel);
+        
+        Page<OrderModel> result = orderJpaAdapter.findOrdersByStatus("PENDIENTE", PageRequest.of(0, 10));
+        
+        assertNotNull(result);
+        assertEquals(1, result.getContent().size());
+        assertEquals("PENDIENTE", result.getContent().get(0).getStatus());
+    }
+
+    @Test
+    void findAllOrders_Success() {
+        when(orderRepository.findAll(PageRequest.of(0, 10)))
+            .thenReturn(new PageImpl<>(List.of(orderEntity)));
+        when(orderEntityMapper.toOrderModel(orderEntity)).thenReturn(orderModel);
+        
+        Page<OrderModel> result = orderJpaAdapter.findAllOrders(PageRequest.of(0, 10));
+        
+        assertNotNull(result);
+        assertEquals(1, result.getContent().size());
     }
 }

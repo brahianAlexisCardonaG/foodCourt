@@ -19,11 +19,21 @@ public class OrderResponseBuilder {
             List<DishModel> dishes,
             OrderModel originalOrder
     ) {
+        return buildOrderResponse(savedOrder, userRoleResponse, restaurant, dishes, originalOrder.getOrderDishes());
+    }
+    
+    public static OrderResponseModel buildOrderResponse(
+            OrderModel order,
+            UserRoleResponse userRoleResponse,
+            RestaurantModel restaurant,
+            List<DishModel> dishes,
+            List<OrderDishBasicModel> orderDishes
+    ) {
         OrderResponseModel response = new OrderResponseModel();
         response.setNameUser(userRoleResponse.getFirstName());
         response.setLastNameUser(userRoleResponse.getLastName());
-        response.setDate(savedOrder.getDate());
-        response.setStatus(savedOrder.getStatus());
+        response.setDate(order.getDate());
+        response.setStatus(order.getStatus());
         response.setNameRestaurant(restaurant.getName());
         
         List<OrderDishResponseModel> orderDishResponses = dishes.stream()
@@ -34,7 +44,7 @@ public class OrderResponseBuilder {
                 dishResponse.setPrice(dish.getPrice());
                 dishResponse.setImageUrl(dish.getImageUrl());
                 
-                Integer quantity = originalOrder.getOrderDishes().stream()
+                Integer quantity = orderDishes.stream()
                     .filter(orderDish -> orderDish.getDishId().equals(dish.getId()))
                     .findFirst()
                     .map(OrderDishBasicModel::getQuantity)

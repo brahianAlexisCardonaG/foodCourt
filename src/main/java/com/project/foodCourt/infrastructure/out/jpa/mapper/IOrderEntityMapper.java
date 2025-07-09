@@ -1,14 +1,11 @@
 package com.project.foodCourt.infrastructure.out.jpa.mapper;
 
-import com.project.foodCourt.domain.model.OrderDishModel;
 import com.project.foodCourt.domain.model.OrderModel;
 import com.project.foodCourt.domain.model.modelbasic.OrderDishBasicModel;
-import com.project.foodCourt.infrastructure.out.jpa.entity.DishEntity;
 import com.project.foodCourt.infrastructure.out.jpa.entity.OrderDishEntity;
 import com.project.foodCourt.infrastructure.out.jpa.entity.OrderDishIdEntity;
 import com.project.foodCourt.infrastructure.out.jpa.entity.OrderEntity;
 import com.project.foodCourt.infrastructure.out.jpa.entity.RestaurantEntity;
-import com.project.foodCourt.infrastructure.out.jpa.repository.IDishRepository;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 

@@ -9,6 +9,8 @@ import com.project.foodCourt.infrastructure.out.jpa.mapper.IOrderEntityMapper;
 import com.project.foodCourt.infrastructure.out.jpa.repository.IOrderRepository;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -44,5 +46,17 @@ public class OrderJpaAdapter implements IOrderPersistencePort {
         return orders.stream()
             .map(orderEntityMapper::toOrderModel)
             .toList();
+    }
+
+    @Override
+    public Page<OrderModel> findOrdersByStatus(String status, Pageable pageable) {
+        Page<OrderEntity> orders = orderRepository.findByStatus(status, pageable);
+        return orders.map(orderEntityMapper::toOrderModel);
+    }
+
+    @Override
+    public Page<OrderModel> findAllOrders(Pageable pageable) {
+        Page<OrderEntity> orders = orderRepository.findAll(pageable);
+        return orders.map(orderEntityMapper::toOrderModel);
     }
 }

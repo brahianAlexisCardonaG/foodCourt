@@ -68,7 +68,7 @@ public class DishRestController {
     @GetMapping("/client-dishes-restaurant")
     public ResponseEntity<DishPageResponseDto> getAllRestaurants(Pageable pageable,
                                                                        @RequestParam Long restaurantId,
-                                                                       Long categoryId) {
+                                                                       @RequestParam(name = "categoryId", required = false) Long categoryId) {
         Page<DishInfoResponseDto> page = iDishHandler.getAllDishesByRestaurantId(pageable, restaurantId, categoryId);
         DishPageResponseDto response = new DishPageResponseDto(
                 page.getContent(),
