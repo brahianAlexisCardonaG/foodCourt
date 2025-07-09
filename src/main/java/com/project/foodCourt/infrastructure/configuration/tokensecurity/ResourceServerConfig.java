@@ -15,7 +15,8 @@ public class ResourceServerConfig {
     private String[] ListAllPermissions =
             new String[]{
                     "/api/v1/restaurant/client-restaurants",
-                    "/api/v1/dish/client-dishes-restaurant"
+                    "/api/v1/dish/client-dishes-restaurant",
+                    "/api/v1/order/create-order-client"
             };
 
     @Bean

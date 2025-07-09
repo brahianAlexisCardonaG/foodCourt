@@ -1,4 +1,4 @@
-package com.project.foodCourt.domain.usecase;
+package com.project.foodCourt.domain.usecase.dish;
 
 import com.project.foodCourt.domain.api.IDishServicePort;
 import com.project.foodCourt.domain.model.CategoryModel;

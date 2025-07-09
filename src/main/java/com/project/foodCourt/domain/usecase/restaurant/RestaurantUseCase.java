@@ -1,4 +1,4 @@
-package com.project.foodCourt.domain.usecase;
+package com.project.foodCourt.domain.usecase.restaurant;
 
 import com.project.foodCourt.domain.api.IRestaurantServicePort;
 import com.project.foodCourt.domain.model.RestaurantModel;
@@ -12,8 +12,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-
-import java.util.List;
 
 @RequiredArgsConstructor
 public class RestaurantUseCase implements IRestaurantServicePort {

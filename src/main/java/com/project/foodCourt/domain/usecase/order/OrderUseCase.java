@@ -1,0 +1,83 @@
+package com.project.foodCourt.domain.usecase.order;
+
+import com.project.foodCourt.domain.api.IOrderServicePort;
+import com.project.foodCourt.domain.model.DishModel;
+import com.project.foodCourt.domain.model.OrderModel;
+import com.project.foodCourt.domain.model.RestaurantModel;
+import com.project.foodCourt.domain.model.feignclient.UserRoleResponse;
+import com.project.foodCourt.domain.model.modelbasic.OrderDishBasicModel;
+import com.project.foodCourt.domain.model.orderresponse.OrderResponseModel;
+import com.project.foodCourt.domain.usecase.order.util.OrderResponseBuilder;
+import com.project.foodCourt.domain.spi.IDishPersistencePort;
+import com.project.foodCourt.domain.spi.IOrderPersistencePort;
+import com.project.foodCourt.domain.spi.IRestaurantPersistencePort;
+import com.project.foodCourt.domain.spi.IUserWebClientPort;
+import com.project.foodCourt.utils.ErrorCatalog;
+import com.project.foodCourt.utils.GenericValidation;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
+public class OrderUseCase implements IOrderServicePort {
+
+    private final IRestaurantPersistencePort iRestaurantPersistencePort;
+    private final IDishPersistencePort iDishPersistencePort;
+    private final GenericValidation genericValidation;
+    private final IOrderPersistencePort iOrderPersistencePort;
+    private final IUserWebClientPort iUserWebClientPort;
+
+
+    @Override
+    public OrderResponseModel createOrder(OrderModel order) {
+        
+        //Validar que el cliente existe
+        UserRoleResponse userRoleResponse = iUserWebClientPort.getUserById(order.getClientId());
+        genericValidation.validateCondition(userRoleResponse == null, ErrorCatalog.USER_NOT_FOUND);
+        
+        //Validar que el restaurante existe
+        Optional<RestaurantModel> restaurant = iRestaurantPersistencePort.getRestaurantById(order.getRestaurant().getId());
+        genericValidation.validateCondition(restaurant.isEmpty(), ErrorCatalog.RESTAURANT_NOT_FOUND);
+        
+        //Validar que el cliente no tiene pedidos en proceso
+        List<String> activeStatuses = List.of("PENDIENTE", "EN_PREPARACION", "LISTO");
+        List<OrderModel> activeOrders = iOrderPersistencePort.findOrdersByClientIdAndStatuses(order.getClientId(), activeStatuses);
+        genericValidation.validateCondition(!activeOrders.isEmpty(), ErrorCatalog.CLIENT_HAS_ACTIVE_ORDER);
+        
+        //Validar platos
+        List<DishModel> dishes = validateOrderDishes(order);
+
+        order.setStatus("PENDIENTE");
+        order.setDate(LocalDate.now());
+        
+        //Guardar la orden
+        OrderModel savedOrder = iOrderPersistencePort.save(order);
+        
+        //Construir OrderResponseModel usando builder
+        return OrderResponseBuilder.buildOrderResponse(
+            savedOrder,
+            userRoleResponse,
+            restaurant.get(),
+            dishes,
+            order
+        );
+    }
+    
+    private List<DishModel> validateOrderDishes(OrderModel order) {
+        List<Long> dishIds = order.getOrderDishes().stream()
+            .map(OrderDishBasicModel::getDishId)
+            .toList();
+        List<DishModel> dishes = iDishPersistencePort.findByIds(dishIds);
+        
+        genericValidation.validateCondition(dishes.size() != dishIds.size(), ErrorCatalog.DISH_NOT_FOUND);
+        
+        for (DishModel dish : dishes) {
+            genericValidation.validateCondition(!dish.getRestaurant().getId().equals(order.getRestaurant().getId()),
+                    ErrorCatalog.DISH_NOT_FROM_RESTAURANT);
+        }
+        
+        return dishes;
+    }
+}

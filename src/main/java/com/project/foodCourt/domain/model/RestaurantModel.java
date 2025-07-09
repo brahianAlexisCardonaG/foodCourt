@@ -2,6 +2,7 @@ package com.project.foodCourt.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.project.foodCourt.domain.model.modelbasic.DishBasicModel;
+import com.project.foodCourt.domain.model.modelbasic.OrderBasicModel;
 import lombok.Data;
 
 import java.util.List;
@@ -17,4 +18,6 @@ public class RestaurantModel {
     private String nit;
     @JsonIgnore
     private List<DishBasicModel> dishes;
+    @JsonIgnore
+    private List<OrderBasicModel> orders;
 }

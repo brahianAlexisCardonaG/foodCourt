@@ -100,17 +100,38 @@ class DishJpaAdapterTest {
         assertFalse(result.isPresent());
     }
     
+    
     @Test
-    void findDishesByRestaurantId_Success() {
-        Page<DishEntity> entityPage = new PageImpl<>(List.of(dishEntity));
-        when(dishRepository.findByRestaurantIdAndOptionalCategoryId(PageRequest.of(0, 10), 1L, null))
-            .thenReturn(entityPage);
-        when(dishEntityMapper.toDishModel(dishEntity)).thenReturn(dishModel);
+    void findByIds_Success() {
+        List<Long> ids = List.of(1L, 2L);
+        DishEntity dishEntity2 = new DishEntity();
+        dishEntity2.setId(2L);
+        dishEntity2.setName("Test Dish 2");
         
-        Page<DishModel> result = dishJpaAdapter.findDishesByRestaurantId(PageRequest.of(0, 10), 1L, null);
+        DishModel dishModel2 = new DishModel();
+        dishModel2.setId(2L);
+        dishModel2.setName("Test Dish 2");
+        
+        when(dishRepository.findAllById(ids)).thenReturn(List.of(dishEntity, dishEntity2));
+        when(dishEntityMapper.toDishModel(dishEntity)).thenReturn(dishModel);
+        when(dishEntityMapper.toDishModel(dishEntity2)).thenReturn(dishModel2);
+        
+        List<DishModel> result = dishJpaAdapter.findByIds(ids);
         
         assertNotNull(result);
-        assertEquals(1, result.getContent().size());
-        assertEquals("Test Dish", result.getContent().get(0).getName());
+        assertEquals(2, result.size());
+        assertEquals("Test Dish", result.get(0).getName());
+        assertEquals("Test Dish 2", result.get(1).getName());
+    }
+    
+    @Test
+    void findByIds_EmptyResult() {
+        List<Long> ids = List.of(1L);
+        when(dishRepository.findAllById(ids)).thenReturn(List.of());
+        
+        List<DishModel> result = dishJpaAdapter.findByIds(ids);
+        
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -36,6 +37,14 @@ public class DishJpaAdapter implements IDishPersistencePort {
     public Optional<DishModel> findById(Long id) {
         Optional<DishEntity> dishEntity = dishRepository.findById(id);
         return dishEntity.map(dishEntityMapper::toDishModel);
+    }
+
+    @Override
+    public List<DishModel> findByIds(List<Long> ids) {
+        List<DishEntity> dishEntities = dishRepository.findAllById(ids);
+        return dishEntities.stream()
+            .map(dishEntityMapper::toDishModel)
+            .toList();
     }
 
     @Override
