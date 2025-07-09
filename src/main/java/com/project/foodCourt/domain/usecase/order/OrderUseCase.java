@@ -6,6 +6,7 @@ import com.project.foodCourt.domain.model.OrderModel;
 import com.project.foodCourt.domain.model.RestaurantModel;
 import com.project.foodCourt.domain.model.feignclient.UserRoleResponse;
 import com.project.foodCourt.domain.model.modelbasic.OrderDishBasicModel;
+import com.project.foodCourt.domain.model.modelbasic.RestaurantBasicModel;
 import com.project.foodCourt.domain.model.orderresponse.OrderResponseModel;
 import com.project.foodCourt.domain.usecase.order.util.OrderResponseBuilder;
 import com.project.foodCourt.domain.spi.IDishPersistencePort;
@@ -61,7 +62,7 @@ public class OrderUseCase implements IOrderServicePort {
         OrderModel savedOrder = iOrderPersistencePort.save(order);
         
         //Construir OrderResponseModel usando builder
-        return OrderResponseBuilder.buildOrderResponse(
+        return OrderResponseBuilder.buildOrderResponseFromOrder(
             savedOrder,
             userRoleResponse,
             restaurant.get(),
@@ -81,6 +82,7 @@ public class OrderUseCase implements IOrderServicePort {
             List<OrderDishModel> orderDishes = iOrderDishPersistencePort.findByOrderId(order.getId());
             List<Long> dishIds = orderDishes.stream()
                 .map(orderDish -> orderDish.getDishes().getId())
+                .filter(id -> id != null)
                 .toList();
             List<DishModel> dishes = iDishPersistencePort.findByIds(dishIds);
             
@@ -114,6 +116,7 @@ public class OrderUseCase implements IOrderServicePort {
             List<OrderDishModel> orderDishes = iOrderDishPersistencePort.findByOrderId(order.getId());
             List<Long> dishIds = orderDishes.stream()
                 .map(orderDish -> orderDish.getDishes().getId())
+                .filter(id -> id != null)
                 .toList();
             List<DishModel> dishes = iDishPersistencePort.findByIds(dishIds);
             
@@ -135,7 +138,53 @@ public class OrderUseCase implements IOrderServicePort {
             );
         });
     }
-    
+
+    @Override
+    public OrderResponseModel assignedEmployeeIdToOrder(Long orderId, Long employeeId) {
+        Optional<OrderModel> orderOpt = iOrderPersistencePort.findById(orderId);
+        genericValidation.validateCondition(orderOpt.isEmpty(), ErrorCatalog.ORDER_NOT_FOUND);
+        
+        UserRoleResponse employeeResponse = iUserWebClientPort.getUserById(employeeId);
+        genericValidation.validateCondition(employeeResponse == null, ErrorCatalog.USER_NOT_FOUND);
+        genericValidation.validateCondition(!"EMPLOYEE".equals(employeeResponse
+                .getRole().getName()), ErrorCatalog.USER_NOT_EMPLOYEE);
+        
+        OrderModel order = orderOpt.get();
+        
+        // Obtener platos antes de modificar la orden
+        List<OrderDishModel> orderDishes = iOrderDishPersistencePort.findByOrderId(order.getId());
+        UserRoleResponse clientResponse = iUserWebClientPort.getUserById(order.getClientId());
+        Optional<RestaurantModel> restaurant = iRestaurantPersistencePort.getRestaurantById(order.getRestaurant().getId());
+        
+        order.setAssignedEmployeeId(employeeId);
+        order.setOrderDishes(null); // Limpiar orderDishes para evitar problemas con IDs nulos
+        
+        OrderModel updatedOrder = iOrderPersistencePort.save(order);
+        List<Long> dishIds = orderDishes.stream()
+            .map(orderDish -> orderDish.getDishes().getId())
+            .filter(id -> id != null)
+            .toList();
+        List<DishModel> dishes = iDishPersistencePort.findByIds(dishIds);
+        
+        List<OrderDishBasicModel> orderDishBasics = orderDishes.stream()
+            .map(orderDish -> {
+                OrderDishBasicModel basic = new OrderDishBasicModel();
+                basic.setDishId(orderDish.getDishes().getId());
+                basic.setQuantity(orderDish.getQuantity());
+                return basic;
+            })
+            .toList();
+        
+        return OrderResponseBuilder.buildOrderResponseWithEmployee(
+            updatedOrder,
+            clientResponse,
+            restaurant.get(),
+            dishes,
+            orderDishBasics,
+            employeeResponse
+        );
+    }
+
     private List<DishModel> validateOrderDishes(OrderModel order) {
         List<Long> dishIds = order.getOrderDishes().stream()
             .map(OrderDishBasicModel::getDishId)
@@ -148,7 +197,6 @@ public class OrderUseCase implements IOrderServicePort {
             genericValidation.validateCondition(!dish.getRestaurant().getId().equals(order.getRestaurant().getId()),
                     ErrorCatalog.DISH_NOT_FROM_RESTAURANT);
         }
-        
         return dishes;
     }
 }

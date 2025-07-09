@@ -7,6 +7,7 @@ public enum ErrorCatalog {
     //user
     USER_NOT_FOUND("ERR_USER_001", "User not found."),
     USER_NOT_OWNER("ERR_USER_002", "The user is not an owner."),
+    USER_NOT_EMPLOYEE("ERR_USER_003", "The user is not an employee."),
 
     //restaurant
     INVALID_RESTAURANT("ERR_RESTAURANT_002", "Invalid restaurant parameters."),
@@ -25,7 +26,8 @@ public enum ErrorCatalog {
     
     //order
     CLIENT_HAS_ACTIVE_ORDER("ERR_ORDER_001", "Client has an active order in process."),
-    DISH_NOT_FROM_RESTAURANT("ERR_ORDER_002", "Dish does not belong to the specified restaurant.")
+    DISH_NOT_FROM_RESTAURANT("ERR_ORDER_002", "Dish does not belong to the specified restaurant."),
+    ORDER_NOT_FOUND("ERR_ORDER_003", "The order not found.")
     ;
 
     private final String code;

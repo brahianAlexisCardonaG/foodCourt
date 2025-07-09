@@ -85,4 +85,24 @@ class OrderRestControllerTest {
         assertEquals(200, result.getStatusCodeValue());
         assertEquals(1, result.getBody().getContent().size());
     }
+
+    @Test
+    void assignedEmployeeIdToOrder_Success() {
+        OrderResponseDto responseWithEmployee = new OrderResponseDto();
+        responseWithEmployee.setNameUser("Test User");
+        responseWithEmployee.setStatus("PENDIENTE");
+        responseWithEmployee.setNameRestaurant("Test Restaurant");
+        responseWithEmployee.setAssignedEmployee("Employee Test");
+        
+        when(orderHandler.assignedEmployeeIdToOrder(1L, 2L)).thenReturn(responseWithEmployee);
+        
+        ResponseEntity<OrderResponseDto> result = orderRestController.assignedEmployeeIdToOrder(1L, 2L);
+        
+        assertNotNull(result);
+        assertEquals(200, result.getStatusCodeValue());
+        assertNotNull(result.getBody());
+        assertEquals("Employee Test", result.getBody().getAssignedEmployee());
+        assertEquals("Test User", result.getBody().getNameUser());
+        assertEquals("PENDIENTE", result.getBody().getStatus());
+    }
 }

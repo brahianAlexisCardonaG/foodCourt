@@ -12,7 +12,7 @@ import java.util.List;
 
 public class OrderResponseBuilder {
     
-    public static OrderResponseModel buildOrderResponse(
+    public static OrderResponseModel buildOrderResponseFromOrder(
             OrderModel savedOrder,
             UserRoleResponse userRoleResponse,
             RestaurantModel restaurant,
@@ -56,6 +56,21 @@ public class OrderResponseBuilder {
             .toList();
         
         response.setOrderDishes(orderDishResponses);
+        return response;
+    }
+    
+    public static OrderResponseModel buildOrderResponseWithEmployee(
+            OrderModel order,
+            UserRoleResponse userRoleResponse,
+            RestaurantModel restaurant,
+            List<DishModel> dishes,
+            List<OrderDishBasicModel> orderDishes,
+            UserRoleResponse assignedEmployee
+    ) {
+        OrderResponseModel response = buildOrderResponse(order, userRoleResponse, restaurant, dishes, orderDishes);
+        if (assignedEmployee != null) {
+            response.setAssignedEmployee(assignedEmployee.getFirstName() + " " + assignedEmployee.getLastName());
+        }
         return response;
     }
 }
