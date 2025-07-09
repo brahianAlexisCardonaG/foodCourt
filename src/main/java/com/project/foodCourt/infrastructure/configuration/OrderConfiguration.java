@@ -1,10 +1,7 @@
 package com.project.foodCourt.infrastructure.configuration;
 
 import com.project.foodCourt.domain.api.IOrderServicePort;
-import com.project.foodCourt.domain.spi.IDishPersistencePort;
-import com.project.foodCourt.domain.spi.IOrderPersistencePort;
-import com.project.foodCourt.domain.spi.IRestaurantPersistencePort;
-import com.project.foodCourt.domain.spi.IUserWebClientPort;
+import com.project.foodCourt.domain.spi.*;
 import com.project.foodCourt.domain.usecase.order.OrderUseCase;
 import com.project.foodCourt.utils.GenericValidation;
 import org.springframework.context.annotation.Bean;
@@ -19,14 +16,16 @@ public class OrderConfiguration {
             IDishPersistencePort dishPersistencePort,
             GenericValidation genericValidation,
             IOrderPersistencePort orderPersistencePort,
-            IUserWebClientPort userWebClientPort
+            IUserWebClientPort userWebClientPort,
+            IOrderDishPersistencePort iOrderDishPersistencePort
     ) {
         return new OrderUseCase(
                 restaurantPersistencePort,
                 dishPersistencePort,
                 genericValidation,
                 orderPersistencePort,
-                userWebClientPort
+                userWebClientPort,
+                iOrderDishPersistencePort
         );
     }
 }

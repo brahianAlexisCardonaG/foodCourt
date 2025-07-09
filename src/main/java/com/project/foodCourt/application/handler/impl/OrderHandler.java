@@ -9,6 +9,8 @@ import com.project.foodCourt.domain.api.IOrderServicePort;
 import com.project.foodCourt.domain.model.OrderModel;
 import com.project.foodCourt.domain.model.orderresponse.OrderResponseModel;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,5 +28,17 @@ public class OrderHandler implements IOrderHandler {
         OrderModel orderModel = iOrderRequestMapper.toOrderDishModel(orderRequestDto);
         OrderResponseModel orderModelCreated = iOrderServicePort.createOrder(orderModel);
         return iOrderResponseMapper.toOrderResponseDto(orderModelCreated);
+    }
+
+    @Override
+    public Page<OrderResponseDto> getOrdersByStatus(String status, Pageable pageable) {
+        Page<OrderResponseModel> orderPage = iOrderServicePort.getOrdersByStatus(status,pageable);
+        return orderPage.map(iOrderResponseMapper::toOrderResponseDto);
+    }
+
+    @Override
+    public Page<OrderResponseDto> getAllOrders(Pageable pageable) {
+        Page<OrderResponseModel> orderPage = iOrderServicePort.getAllOrders(pageable);
+        return orderPage.map(iOrderResponseMapper::toOrderResponseDto);
     }
 }

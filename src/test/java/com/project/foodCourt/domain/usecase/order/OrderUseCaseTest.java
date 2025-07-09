@@ -2,14 +2,17 @@ package com.project.foodCourt.domain.usecase.order;
 
 import com.project.foodCourt.domain.exception.BusinessException;
 import com.project.foodCourt.domain.model.DishModel;
+import com.project.foodCourt.domain.model.OrderDishModel;
 import com.project.foodCourt.domain.model.OrderModel;
 import com.project.foodCourt.domain.model.RestaurantModel;
 import com.project.foodCourt.domain.model.feignclient.RoleResponse;
 import com.project.foodCourt.domain.model.feignclient.UserRoleResponse;
+import com.project.foodCourt.domain.model.modelbasic.DishBasicModel;
 import com.project.foodCourt.domain.model.modelbasic.OrderDishBasicModel;
 import com.project.foodCourt.domain.model.modelbasic.RestaurantBasicModel;
 import com.project.foodCourt.domain.model.orderresponse.OrderResponseModel;
 import com.project.foodCourt.domain.spi.IDishPersistencePort;
+import com.project.foodCourt.domain.spi.IOrderDishPersistencePort;
 import com.project.foodCourt.domain.spi.IOrderPersistencePort;
 import com.project.foodCourt.domain.spi.IRestaurantPersistencePort;
 import com.project.foodCourt.domain.spi.IUserWebClientPort;
@@ -29,6 +32,9 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 @ExtendWith(MockitoExtension.class)
 class OrderUseCaseTest {
@@ -47,6 +53,9 @@ class OrderUseCaseTest {
     
     @Mock
     private IUserWebClientPort userWebClientPort;
+    
+    @Mock
+    private IOrderDishPersistencePort orderDishPersistencePort;
     
     @InjectMocks
     private OrderUseCase orderUseCase;
@@ -170,5 +179,47 @@ class OrderUseCaseTest {
             .when(genericValidation).validateCondition(eq(true), eq(ErrorCatalog.DISH_NOT_FROM_RESTAURANT));
         
         assertThrows(BusinessException.class, () -> orderUseCase.createOrder(orderModel));
+    }
+
+    @Test
+    void getOrdersByStatus_Success() {
+        OrderDishModel orderDishModel = new OrderDishModel();
+        DishBasicModel dishBasic = new DishBasicModel();
+        dishBasic.setId(1L);
+        orderDishModel.setDishes(dishBasic);
+        orderDishModel.setQuantity(2);
+        
+        Page<OrderModel> orderPage = new PageImpl<>(List.of(orderModel));
+        when(orderPersistencePort.findOrdersByStatus("PENDIENTE", PageRequest.of(0, 10))).thenReturn(orderPage);
+        when(userWebClientPort.getUserById(1L)).thenReturn(userRoleResponse);
+        when(restaurantPersistencePort.getRestaurantById(1L)).thenReturn(Optional.of(restaurantModel));
+        when(orderDishPersistencePort.findByOrderId(any())).thenReturn(List.of(orderDishModel));
+        when(dishPersistencePort.findByIds(List.of(1L))).thenReturn(List.of(dishModel));
+        
+        Page<OrderResponseModel> result = orderUseCase.getOrdersByStatus("PENDIENTE", PageRequest.of(0, 10));
+        
+        assertNotNull(result);
+        assertEquals(1, result.getContent().size());
+    }
+
+    @Test
+    void getAllOrders_Success() {
+        OrderDishModel orderDishModel = new OrderDishModel();
+        DishBasicModel dishBasic = new DishBasicModel();
+        dishBasic.setId(1L);
+        orderDishModel.setDishes(dishBasic);
+        orderDishModel.setQuantity(2);
+        
+        Page<OrderModel> orderPage = new PageImpl<>(List.of(orderModel));
+        when(orderPersistencePort.findAllOrders(PageRequest.of(0, 10))).thenReturn(orderPage);
+        when(userWebClientPort.getUserById(1L)).thenReturn(userRoleResponse);
+        when(restaurantPersistencePort.getRestaurantById(1L)).thenReturn(Optional.of(restaurantModel));
+        when(orderDishPersistencePort.findByOrderId(any())).thenReturn(List.of(orderDishModel));
+        when(dishPersistencePort.findByIds(List.of(1L))).thenReturn(List.of(dishModel));
+        
+        Page<OrderResponseModel> result = orderUseCase.getAllOrders(PageRequest.of(0, 10));
+        
+        assertNotNull(result);
+        assertEquals(1, result.getContent().size());
     }
 }

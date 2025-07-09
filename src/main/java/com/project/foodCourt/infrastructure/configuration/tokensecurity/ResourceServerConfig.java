@@ -33,6 +33,8 @@ public class ResourceServerConfig {
                         .hasAuthority("OWNER")
                         .requestMatchers("/api/v1/restaurant/**")
                         .hasAuthority("ADMIN")
+                        .requestMatchers("/api/v1/order/**")
+                        .hasAuthority("EMPLOYEE")
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2

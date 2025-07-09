@@ -1,6 +1,7 @@
 package com.project.foodCourt.infrastructure.input.rest;
 
 import com.project.foodCourt.application.dto.request.order.OrderRequestDto;
+import com.project.foodCourt.application.dto.response.order.OrderPageResponseDto;
 import com.project.foodCourt.application.dto.response.order.OrderResponseDto;
 import com.project.foodCourt.application.handler.IOrderHandler;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,7 +10,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -51,5 +58,31 @@ class OrderRestControllerTest {
         assertEquals("Test User", result.getBody().getNameUser());
         assertEquals("PENDIENTE", result.getBody().getStatus());
         assertEquals("Test Restaurant", result.getBody().getNameRestaurant());
+    }
+
+    @Test
+    void getOrdersByStatus_WithStatus() {
+        Page<OrderResponseDto> page = new PageImpl<>(List.of(responseDto));
+        when(orderHandler.getOrdersByStatus("PENDIENTE", PageRequest.of(0, 10))).thenReturn(page);
+        
+        ResponseEntity<OrderPageResponseDto> result = orderRestController.getOrdersByStatus(
+            PageRequest.of(0, 10), "PENDIENTE");
+        
+        assertNotNull(result);
+        assertEquals(200, result.getStatusCodeValue());
+        assertEquals(1, result.getBody().getContent().size());
+    }
+
+    @Test
+    void getOrdersByStatus_WithoutStatus() {
+        Page<OrderResponseDto> page = new PageImpl<>(List.of(responseDto));
+        when(orderHandler.getAllOrders(PageRequest.of(0, 10))).thenReturn(page);
+        
+        ResponseEntity<OrderPageResponseDto> result = orderRestController.getOrdersByStatus(
+            PageRequest.of(0, 10), null);
+        
+        assertNotNull(result);
+        assertEquals(200, result.getStatusCodeValue());
+        assertEquals(1, result.getBody().getContent().size());
     }
 }

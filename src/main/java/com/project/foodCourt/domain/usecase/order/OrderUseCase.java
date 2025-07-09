@@ -9,9 +9,11 @@ import com.project.foodCourt.domain.model.modelbasic.OrderDishBasicModel;
 import com.project.foodCourt.domain.model.orderresponse.OrderResponseModel;
 import com.project.foodCourt.domain.usecase.order.util.OrderResponseBuilder;
 import com.project.foodCourt.domain.spi.IDishPersistencePort;
+import com.project.foodCourt.domain.spi.IOrderDishPersistencePort;
 import com.project.foodCourt.domain.spi.IOrderPersistencePort;
 import com.project.foodCourt.domain.spi.IRestaurantPersistencePort;
 import com.project.foodCourt.domain.spi.IUserWebClientPort;
+import com.project.foodCourt.domain.model.OrderDishModel;
 import com.project.foodCourt.utils.ErrorCatalog;
 import com.project.foodCourt.utils.GenericValidation;
 
@@ -19,6 +21,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @RequiredArgsConstructor
 public class OrderUseCase implements IOrderServicePort {
@@ -28,6 +32,7 @@ public class OrderUseCase implements IOrderServicePort {
     private final GenericValidation genericValidation;
     private final IOrderPersistencePort iOrderPersistencePort;
     private final IUserWebClientPort iUserWebClientPort;
+    private final IOrderDishPersistencePort iOrderDishPersistencePort;
 
 
     @Override
@@ -63,6 +68,72 @@ public class OrderUseCase implements IOrderServicePort {
             dishes,
             order
         );
+    }
+
+    @Override
+    public Page<OrderResponseModel> getOrdersByStatus(String status, Pageable pageable) {
+        Page<OrderModel> orders = iOrderPersistencePort.findOrdersByStatus(status, pageable);
+        
+        return orders.map(order -> {
+            UserRoleResponse userRoleResponse = iUserWebClientPort.getUserById(order.getClientId());
+            Optional<RestaurantModel> restaurant = iRestaurantPersistencePort.getRestaurantById(order.getRestaurant().getId());
+            
+            List<OrderDishModel> orderDishes = iOrderDishPersistencePort.findByOrderId(order.getId());
+            List<Long> dishIds = orderDishes.stream()
+                .map(orderDish -> orderDish.getDishes().getId())
+                .toList();
+            List<DishModel> dishes = iDishPersistencePort.findByIds(dishIds);
+            
+            List<OrderDishBasicModel> orderDishBasics = orderDishes.stream()
+                .map(orderDish -> {
+                    OrderDishBasicModel basic = new OrderDishBasicModel();
+                    basic.setDishId(orderDish.getDishes().getId());
+                    basic.setQuantity(orderDish.getQuantity());
+                    return basic;
+                })
+                .toList();
+            
+            return OrderResponseBuilder.buildOrderResponse(
+                order,
+                userRoleResponse,
+                restaurant.get(),
+                dishes,
+                orderDishBasics
+            );
+        });
+    }
+
+    @Override
+    public Page<OrderResponseModel> getAllOrders(Pageable pageable) {
+        Page<OrderModel> orders = iOrderPersistencePort.findAllOrders(pageable);
+        
+        return orders.map(order -> {
+            UserRoleResponse userRoleResponse = iUserWebClientPort.getUserById(order.getClientId());
+            Optional<RestaurantModel> restaurant = iRestaurantPersistencePort.getRestaurantById(order.getRestaurant().getId());
+            
+            List<OrderDishModel> orderDishes = iOrderDishPersistencePort.findByOrderId(order.getId());
+            List<Long> dishIds = orderDishes.stream()
+                .map(orderDish -> orderDish.getDishes().getId())
+                .toList();
+            List<DishModel> dishes = iDishPersistencePort.findByIds(dishIds);
+            
+            List<OrderDishBasicModel> orderDishBasics = orderDishes.stream()
+                .map(orderDish -> {
+                    OrderDishBasicModel basic = new OrderDishBasicModel();
+                    basic.setDishId(orderDish.getDishes().getId());
+                    basic.setQuantity(orderDish.getQuantity());
+                    return basic;
+                })
+                .toList();
+            
+            return OrderResponseBuilder.buildOrderResponse(
+                order,
+                userRoleResponse,
+                restaurant.get(),
+                dishes,
+                orderDishBasics
+            );
+        });
     }
     
     private List<DishModel> validateOrderDishes(OrderModel order) {
