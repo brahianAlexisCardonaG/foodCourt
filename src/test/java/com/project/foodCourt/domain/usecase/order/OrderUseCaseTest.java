@@ -15,6 +15,7 @@ import com.project.foodCourt.domain.spi.IDishPersistencePort;
 import com.project.foodCourt.domain.spi.IOrderDishPersistencePort;
 import com.project.foodCourt.domain.spi.IOrderPersistencePort;
 import com.project.foodCourt.domain.spi.IRestaurantPersistencePort;
+import com.project.foodCourt.domain.spi.ISmsNotificationPort;
 import com.project.foodCourt.domain.spi.IUserWebClientPort;
 import com.project.foodCourt.utils.ErrorCatalog;
 import com.project.foodCourt.utils.GenericValidation;
@@ -57,6 +58,9 @@ class OrderUseCaseTest {
     @Mock
     private IOrderDishPersistencePort orderDishPersistencePort;
     
+    @Mock
+    private ISmsNotificationPort smsNotificationPort;
+    
     @InjectMocks
     private OrderUseCase orderUseCase;
     
@@ -87,6 +91,7 @@ class OrderUseCaseTest {
         userRoleResponse = new UserRoleResponse();
         userRoleResponse.setId(1L);
         userRoleResponse.setFirstName("Test User");
+        userRoleResponse.setPhone("+1234567890");
         userRoleResponse.setRole(roleResponse);
         
         restaurantModel = new RestaurantModel();
@@ -315,12 +320,17 @@ class OrderUseCaseTest {
         when(orderPersistencePort.findById(1L)).thenReturn(Optional.of(orderModel));
         when(userWebClientPort.getUserById(2L)).thenReturn(employeeResponse);
         when(orderPersistencePort.save(any(OrderModel.class))).thenReturn(orderModel);
+        when(userWebClientPort.getUserById(1L)).thenReturn(userRoleResponse);
+        when(orderDishPersistencePort.findByOrderId(1L)).thenReturn(List.of());
+        when(dishPersistencePort.findByIds(anyList())).thenReturn(List.of());
         
         OrderModel result = orderUseCase.updateStatusOrderToReady(1L, 2L);
         
         assertNotNull(result);
         verify(orderPersistencePort).findById(1L);
         verify(userWebClientPort).getUserById(2L);
+        verify(userWebClientPort).getUserById(1L);
+        verify(smsNotificationPort).sendOrderReadyNotification(eq("whatsapp:+1234567890"), eq(1L), anyList());
         verify(orderPersistencePort).save(any(OrderModel.class));
     }
     
@@ -364,5 +374,34 @@ class OrderUseCaseTest {
             .when(genericValidation).validateCondition(eq(true), eq(ErrorCatalog.USER_NOT_EMPLOYEE));
         
         assertThrows(BusinessException.class, () -> orderUseCase.updateStatusOrderToReady(1L, 2L));
+    }
+    
+    @Test
+    void updateStatusOrderToReady_ClientWithoutPhone() {
+        RoleResponse employeeRole = new RoleResponse();
+        employeeRole.setName("EMPLOYEE");
+        
+        UserRoleResponse employeeResponse = new UserRoleResponse();
+        employeeResponse.setId(2L);
+        employeeResponse.setRole(employeeRole);
+        
+        UserRoleResponse clientWithoutPhone = new UserRoleResponse();
+        clientWithoutPhone.setId(1L);
+        clientWithoutPhone.setFirstName("Client");
+        clientWithoutPhone.setPhone(null);
+        
+        orderModel.setId(1L);
+        
+        when(orderPersistencePort.findById(1L)).thenReturn(Optional.of(orderModel));
+        when(userWebClientPort.getUserById(2L)).thenReturn(employeeResponse);
+        when(userWebClientPort.getUserById(1L)).thenReturn(clientWithoutPhone);
+        when(orderPersistencePort.save(any(OrderModel.class))).thenReturn(orderModel);
+        when(orderDishPersistencePort.findByOrderId(1L)).thenReturn(List.of());
+        when(dishPersistencePort.findByIds(anyList())).thenReturn(List.of());
+        
+        OrderModel result = orderUseCase.updateStatusOrderToReady(1L, 2L);
+        
+        assertNotNull(result);
+        verify(smsNotificationPort, never()).sendOrderReadyNotification(anyString(), anyLong(), anyList());
     }
 }
