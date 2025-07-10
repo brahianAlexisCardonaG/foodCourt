@@ -29,5 +29,13 @@ application:
     jwt:
       secret-key: m2yrnAnikqppG3cqmTOGXExVuVlLxOvaN5q2Gqwel/aigX+wgP68HvbE1ypcpUBv
 
+twilio:
+  account:
+    sid: ACa25649906639c7fc7cfd53fc37dc7d9e
+  auth:
+    token: 1b9a0be9cb56960c840e7b6b064a6a8b
+  phone:
+    number: whatsapp:+14155238886
+
 appdescription: "API management foodCourt"
 appversion: "1.0.0"
