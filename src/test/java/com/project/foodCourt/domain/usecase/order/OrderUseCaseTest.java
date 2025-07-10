@@ -298,4 +298,71 @@ class OrderUseCaseTest {
         
         assertThrows(BusinessException.class, () -> orderUseCase.assignedEmployeeIdToOrder(1L, 2L));
     }
+    
+    @Test
+    void updateStatusOrderToReady_Success() {
+        RoleResponse employeeRole = new RoleResponse();
+        employeeRole.setName("EMPLOYEE");
+        
+        UserRoleResponse employeeResponse = new UserRoleResponse();
+        employeeResponse.setId(2L);
+        employeeResponse.setFirstName("Employee");
+        employeeResponse.setRole(employeeRole);
+        
+        orderModel.setId(1L);
+        orderModel.setStatus("EN_PREPARACION");
+        
+        when(orderPersistencePort.findById(1L)).thenReturn(Optional.of(orderModel));
+        when(userWebClientPort.getUserById(2L)).thenReturn(employeeResponse);
+        when(orderPersistencePort.save(any(OrderModel.class))).thenReturn(orderModel);
+        
+        OrderModel result = orderUseCase.updateStatusOrderToReady(1L, 2L);
+        
+        assertNotNull(result);
+        verify(orderPersistencePort).findById(1L);
+        verify(userWebClientPort).getUserById(2L);
+        verify(orderPersistencePort).save(any(OrderModel.class));
+    }
+    
+    @Test
+    void updateStatusOrderToReady_OrderNotFound() {
+        when(orderPersistencePort.findById(1L)).thenReturn(Optional.empty());
+        doThrow(new BusinessException(ErrorCatalog.ORDER_NOT_FOUND))
+            .when(genericValidation).validateCondition(eq(true), eq(ErrorCatalog.ORDER_NOT_FOUND));
+        
+        assertThrows(BusinessException.class, () -> orderUseCase.updateStatusOrderToReady(1L, 2L));
+        verify(orderPersistencePort).findById(1L);
+    }
+    
+    @Test
+    void updateStatusOrderToReady_EmployeeNotFound() {
+        orderModel.setId(1L);
+        
+        when(orderPersistencePort.findById(1L)).thenReturn(Optional.of(orderModel));
+        when(userWebClientPort.getUserById(2L)).thenReturn(null);
+        doThrow(new BusinessException(ErrorCatalog.USER_NOT_FOUND))
+            .when(genericValidation).validateCondition(eq(true), eq(ErrorCatalog.USER_NOT_FOUND));
+        
+        assertThrows(BusinessException.class, () -> orderUseCase.updateStatusOrderToReady(1L, 2L));
+        verify(userWebClientPort).getUserById(2L);
+    }
+    
+    @Test
+    void updateStatusOrderToReady_UserNotEmployee() {
+        RoleResponse clientRole = new RoleResponse();
+        clientRole.setName("CLIENT");
+        
+        UserRoleResponse nonEmployeeResponse = new UserRoleResponse();
+        nonEmployeeResponse.setId(2L);
+        nonEmployeeResponse.setRole(clientRole);
+        
+        orderModel.setId(1L);
+        
+        when(orderPersistencePort.findById(1L)).thenReturn(Optional.of(orderModel));
+        when(userWebClientPort.getUserById(2L)).thenReturn(nonEmployeeResponse);
+        doThrow(new BusinessException(ErrorCatalog.USER_NOT_EMPLOYEE))
+            .when(genericValidation).validateCondition(eq(true), eq(ErrorCatalog.USER_NOT_EMPLOYEE));
+        
+        assertThrows(BusinessException.class, () -> orderUseCase.updateStatusOrderToReady(1L, 2L));
+    }
 }

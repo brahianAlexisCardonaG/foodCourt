@@ -157,6 +157,7 @@ public class OrderUseCase implements IOrderServicePort {
         Optional<RestaurantModel> restaurant = iRestaurantPersistencePort.getRestaurantById(order.getRestaurant().getId());
         
         order.setAssignedEmployeeId(employeeId);
+        order.setStatus("EN_PREPARACION");
         order.setOrderDishes(null); // Limpiar orderDishes para evitar problemas con IDs nulos
         
         OrderModel updatedOrder = iOrderPersistencePort.save(order);
@@ -183,6 +184,23 @@ public class OrderUseCase implements IOrderServicePort {
             orderDishBasics,
             employeeResponse
         );
+    }
+
+    @Override
+    public OrderModel updateStatusOrderToReady(Long orderId, Long employeeId) {
+        Optional<OrderModel> orderOpt = iOrderPersistencePort.findById(orderId);
+        genericValidation.validateCondition(orderOpt.isEmpty(), ErrorCatalog.ORDER_NOT_FOUND);
+
+        UserRoleResponse employeeResponse = iUserWebClientPort.getUserById(employeeId);
+        genericValidation.validateCondition(employeeResponse == null, ErrorCatalog.USER_NOT_FOUND);
+        genericValidation.validateCondition(!"EMPLOYEE".equals(employeeResponse
+                .getRole().getName()), ErrorCatalog.USER_NOT_EMPLOYEE);
+
+        OrderModel order = orderOpt.get();
+        order.setStatus("LISTO");
+        order.setOrderDishes(null);
+
+        return iOrderPersistencePort.save(order);
     }
 
     private List<DishModel> validateOrderDishes(OrderModel order) {
