@@ -17,7 +17,8 @@ public class OrderConfiguration {
             GenericValidation genericValidation,
             IOrderPersistencePort orderPersistencePort,
             IUserWebClientPort userWebClientPort,
-            IOrderDishPersistencePort iOrderDishPersistencePort
+            IOrderDishPersistencePort iOrderDishPersistencePort,
+            ISmsNotificationPort smsNotificationPort
     ) {
         return new OrderUseCase(
                 restaurantPersistencePort,
@@ -25,7 +26,8 @@ public class OrderConfiguration {
                 genericValidation,
                 orderPersistencePort,
                 userWebClientPort,
-                iOrderDishPersistencePort
+                iOrderDishPersistencePort,
+                smsNotificationPort
         );
     }
 }

@@ -1,6 +1,7 @@
 package com.project.foodCourt.application.handler.impl;
 
 import com.project.foodCourt.application.dto.request.order.OrderRequestDto;
+import com.project.foodCourt.application.dto.response.order.OrderBasicResponseDto;
 import com.project.foodCourt.application.dto.response.order.OrderResponseDto;
 import com.project.foodCourt.application.handler.IOrderHandler;
 import com.project.foodCourt.application.mapper.order.IOrderRequestMapper;
@@ -47,5 +48,11 @@ public class OrderHandler implements IOrderHandler {
         OrderResponseModel orderResponseModel = iOrderServicePort
                 .assignedEmployeeIdToOrder(orderId, employeeId);
         return iOrderResponseMapper.toOrderResponseDto(orderResponseModel);
+    }
+
+    @Override
+    public OrderBasicResponseDto updateStatusOrderToReady(Long orderId, Long employeeId) {
+        OrderModel orderModel = iOrderServicePort.updateStatusOrderToReady(orderId, employeeId);
+        return iOrderResponseMapper.toOrderBasicResponseDto(orderModel);
     }
 }

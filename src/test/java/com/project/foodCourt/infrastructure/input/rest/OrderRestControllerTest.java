@@ -1,6 +1,7 @@
 package com.project.foodCourt.infrastructure.input.rest;
 
 import com.project.foodCourt.application.dto.request.order.OrderRequestDto;
+import com.project.foodCourt.application.dto.response.order.OrderBasicResponseDto;
 import com.project.foodCourt.application.dto.response.order.OrderPageResponseDto;
 import com.project.foodCourt.application.dto.response.order.OrderResponseDto;
 import com.project.foodCourt.application.handler.IOrderHandler;
@@ -33,6 +34,7 @@ class OrderRestControllerTest {
 
     private OrderRequestDto requestDto;
     private OrderResponseDto responseDto;
+    private OrderBasicResponseDto basicResponseDto;
 
     @BeforeEach
     void setUp() {
@@ -44,6 +46,11 @@ class OrderRestControllerTest {
         responseDto.setNameUser("Test User");
         responseDto.setStatus("PENDIENTE");
         responseDto.setNameRestaurant("Test Restaurant");
+        
+        basicResponseDto = new OrderBasicResponseDto();
+        basicResponseDto.setId(1L);
+        basicResponseDto.setStatus("LISTO");
+        basicResponseDto.setRestaurantId(1L);
     }
 
     @Test
@@ -104,5 +111,19 @@ class OrderRestControllerTest {
         assertEquals("Employee Test", result.getBody().getAssignedEmployee());
         assertEquals("Test User", result.getBody().getNameUser());
         assertEquals("PENDIENTE", result.getBody().getStatus());
+    }
+    
+    @Test
+    void updateStatusOrderToReady_Success() {
+        when(orderHandler.updateStatusOrderToReady(1L, 2L)).thenReturn(basicResponseDto);
+        
+        ResponseEntity<OrderBasicResponseDto> result = orderRestController.updateStatusOrderToReady(1L, 2L);
+        
+        assertNotNull(result);
+        assertEquals(200, result.getStatusCodeValue());
+        assertNotNull(result.getBody());
+        assertEquals(1L, result.getBody().getId());
+        assertEquals("LISTO", result.getBody().getStatus());
+        assertEquals(1L, result.getBody().getRestaurantId());
     }
 }

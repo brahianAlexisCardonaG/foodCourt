@@ -6,6 +6,7 @@ import com.project.foodCourt.application.dto.request.order.OrderRequestDto;
 import com.project.foodCourt.application.dto.response.dish.DishInfoResponseDto;
 import com.project.foodCourt.application.dto.response.dish.DishPageResponseDto;
 import com.project.foodCourt.application.dto.response.dish.DishResponseDto;
+import com.project.foodCourt.application.dto.response.order.OrderBasicResponseDto;
 import com.project.foodCourt.application.dto.response.order.OrderPageResponseDto;
 import com.project.foodCourt.application.dto.response.order.OrderResponseDto;
 import com.project.foodCourt.application.handler.IOrderHandler;
@@ -67,5 +68,17 @@ public class OrderRestController {
             @RequestParam Long employeeId
     ) {
         return ResponseEntity.ok(iOrderHandler.assignedEmployeeIdToOrder(orderId, employeeId));
+    }
+
+    @Operation(summary = "update state order to LISTO")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "update state order to LISTO with success", content = @Content),
+    })
+    @PatchMapping("/state-update-ready")
+    public ResponseEntity<OrderBasicResponseDto> updateStatusOrderToReady(
+            @RequestParam Long orderId,
+            @RequestParam Long employeeId
+    ) {
+        return ResponseEntity.ok(iOrderHandler.updateStatusOrderToReady(orderId, employeeId));
     }
 }
