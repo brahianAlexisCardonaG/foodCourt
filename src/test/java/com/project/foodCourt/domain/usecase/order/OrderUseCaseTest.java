@@ -246,6 +246,7 @@ class OrderUseCaseTest {
         orderDishModel.setQuantity(2);
         
         orderModel.setId(1L);
+        orderModel.setStatus("PENDIENTE");
         
         when(orderPersistencePort.findById(1L)).thenReturn(Optional.of(orderModel));
         when(userWebClientPort.getUserById(2L)).thenReturn(employeeResponse);
@@ -275,6 +276,7 @@ class OrderUseCaseTest {
     @Test
     void assignedEmployeeIdToOrder_EmployeeNotFound() {
         orderModel.setId(1L);
+        orderModel.setStatus("PENDIENTE");
         
         when(orderPersistencePort.findById(1L)).thenReturn(Optional.of(orderModel));
         when(userWebClientPort.getUserById(2L)).thenReturn(null);
@@ -295,6 +297,7 @@ class OrderUseCaseTest {
         nonEmployeeResponse.setRole(clientRole);
         
         orderModel.setId(1L);
+        orderModel.setStatus("PENDIENTE");
         
         when(orderPersistencePort.findById(1L)).thenReturn(Optional.of(orderModel));
         when(userWebClientPort.getUserById(2L)).thenReturn(nonEmployeeResponse);
@@ -330,7 +333,7 @@ class OrderUseCaseTest {
         verify(orderPersistencePort).findById(1L);
         verify(userWebClientPort).getUserById(2L);
         verify(userWebClientPort).getUserById(1L);
-        verify(smsNotificationPort).sendOrderReadyNotification(eq("whatsapp:+1234567890"), eq(1L), anyList());
+        verify(smsNotificationPort).sendOrderReadyNotification(eq("whatsapp:+1234567890"), eq(1L), anyList(), anyString());
         verify(orderPersistencePort).save(any(OrderModel.class));
     }
     
@@ -347,7 +350,7 @@ class OrderUseCaseTest {
     @Test
     void updateStatusOrderToReady_EmployeeNotFound() {
         orderModel.setId(1L);
-        
+        orderModel.setStatus("LISTO");
         when(orderPersistencePort.findById(1L)).thenReturn(Optional.of(orderModel));
         when(userWebClientPort.getUserById(2L)).thenReturn(null);
         doThrow(new BusinessException(ErrorCatalog.USER_NOT_FOUND))
@@ -367,6 +370,7 @@ class OrderUseCaseTest {
         nonEmployeeResponse.setRole(clientRole);
         
         orderModel.setId(1L);
+        orderModel.setStatus("LISTO");
         
         when(orderPersistencePort.findById(1L)).thenReturn(Optional.of(orderModel));
         when(userWebClientPort.getUserById(2L)).thenReturn(nonEmployeeResponse);
@@ -391,6 +395,7 @@ class OrderUseCaseTest {
         clientWithoutPhone.setPhone(null);
         
         orderModel.setId(1L);
+        orderModel.setStatus("LISTO");
         
         when(orderPersistencePort.findById(1L)).thenReturn(Optional.of(orderModel));
         when(userWebClientPort.getUserById(2L)).thenReturn(employeeResponse);
@@ -402,6 +407,86 @@ class OrderUseCaseTest {
         OrderModel result = orderUseCase.updateStatusOrderToReady(1L, 2L);
         
         assertNotNull(result);
-        verify(smsNotificationPort, never()).sendOrderReadyNotification(anyString(), anyLong(), anyList());
+        verify(smsNotificationPort, never()).sendOrderReadyNotification(anyString(), anyLong(), anyList(), anyString());
+    }
+    
+    @Test
+    void updateStatusOrderToDelivered_Success() {
+        RoleResponse employeeRole = new RoleResponse();
+        employeeRole.setName("EMPLOYEE");
+        
+        UserRoleResponse employeeResponse = new UserRoleResponse();
+        employeeResponse.setId(2L);
+        employeeResponse.setRole(employeeRole);
+        
+        orderModel.setId(1L);
+        orderModel.setStatus("LISTO");
+        orderModel.setSecurityPin("123456");
+        
+        when(orderPersistencePort.findById(1L)).thenReturn(Optional.of(orderModel));
+        when(userWebClientPort.getUserById(2L)).thenReturn(employeeResponse);
+        when(orderPersistencePort.save(any(OrderModel.class))).thenReturn(orderModel);
+        
+        OrderModel result = orderUseCase.updateStatusOrderToDelivered(1L, 2L, "123456");
+        
+        assertNotNull(result);
+        verify(orderPersistencePort).findById(1L);
+        verify(userWebClientPort).getUserById(2L);
+        verify(orderPersistencePort).save(any(OrderModel.class));
+    }
+    
+    @Test
+    void updateStatusOrderToDelivered_OrderNotFound() {
+        when(orderPersistencePort.findById(1L)).thenReturn(Optional.empty());
+        doThrow(new BusinessException(ErrorCatalog.ORDER_NOT_FOUND))
+            .when(genericValidation).validateCondition(eq(true), eq(ErrorCatalog.ORDER_NOT_FOUND));
+        
+        assertThrows(BusinessException.class, () -> orderUseCase.updateStatusOrderToDelivered(1L, 2L, "123456"));
+        verify(orderPersistencePort).findById(1L);
+    }
+    
+    @Test
+    void updateStatusOrderToDelivered_OrderNotReady() {
+        orderModel.setId(1L);
+        orderModel.setStatus("PENDIENTE");
+        
+        when(orderPersistencePort.findById(1L)).thenReturn(Optional.of(orderModel));
+        doThrow(new BusinessException(ErrorCatalog.ORDER_NOT_READY))
+            .when(genericValidation).validateCondition(eq(true), eq(ErrorCatalog.ORDER_NOT_READY));
+        
+        assertThrows(BusinessException.class, () -> orderUseCase.updateStatusOrderToDelivered(1L, 2L, "123456"));
+    }
+    
+    @Test
+    void updateStatusOrderToDelivered_InvalidSecurityPin() {
+        orderModel.setId(1L);
+        orderModel.setStatus("LISTO");
+        orderModel.setSecurityPin("123456");
+        
+        RoleResponse employeeRole = new RoleResponse();
+        employeeRole.setName("EMPLOYEE");
+        
+        UserRoleResponse employeeResponse = new UserRoleResponse();
+        employeeResponse.setId(2L);
+        employeeResponse.setRole(employeeRole);
+        
+        when(orderPersistencePort.findById(1L)).thenReturn(Optional.of(orderModel));
+        when(userWebClientPort.getUserById(2L)).thenReturn(employeeResponse);
+        doThrow(new BusinessException(ErrorCatalog.INVALID_SECURITY_PIN))
+            .when(genericValidation).validateCondition(eq(true), eq(ErrorCatalog.INVALID_SECURITY_PIN));
+        
+        assertThrows(BusinessException.class, () -> orderUseCase.updateStatusOrderToDelivered(1L, 2L, "wrong-pin"));
+    }
+    
+    @Test
+    void updateStatusOrderToReady_OrderNotInPreparation() {
+        orderModel.setId(1L);
+        orderModel.setStatus("PENDIENTE");
+        
+        when(orderPersistencePort.findById(1L)).thenReturn(Optional.of(orderModel));
+        doThrow(new BusinessException(ErrorCatalog.ORDER_NOT_IN_PREPARATION))
+            .when(genericValidation).validateCondition(eq(true), eq(ErrorCatalog.ORDER_NOT_IN_PREPARATION));
+        
+        assertThrows(BusinessException.class, () -> orderUseCase.updateStatusOrderToReady(1L, 2L));
     }
 }

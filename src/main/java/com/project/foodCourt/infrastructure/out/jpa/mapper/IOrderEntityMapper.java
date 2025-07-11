@@ -28,6 +28,7 @@ public interface IOrderEntityMapper {
         orderModel.setStatus(orderEntity.getStatus());
         orderModel.setChefId(orderEntity.getChefId());
         orderModel.setAssignedEmployeeId(orderEntity.getAssignedEmployeeId());
+        orderModel.setSecurityPin(orderEntity.getSecurityPin());
         
         if (orderEntity.getRestaurant() != null) {
             com.project.foodCourt.domain.model.modelbasic.RestaurantBasicModel restaurant = 
@@ -58,6 +59,7 @@ public interface IOrderEntityMapper {
         orderEntity.setStatus(orderModel.getStatus());
         orderEntity.setChefId(orderModel.getChefId());
         orderEntity.setAssignedEmployeeId(orderModel.getAssignedEmployeeId());
+        orderEntity.setSecurityPin(orderModel.getSecurityPin());
         
         if (orderModel.getRestaurant() != null) {
             RestaurantEntity restaurant = new RestaurantEntity();

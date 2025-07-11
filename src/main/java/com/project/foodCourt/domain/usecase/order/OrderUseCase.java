@@ -147,6 +147,8 @@ public class OrderUseCase implements IOrderServicePort {
     public OrderResponseModel assignedEmployeeIdToOrder(Long orderId, Long employeeId) {
         Optional<OrderModel> orderOpt = iOrderPersistencePort.findById(orderId);
         genericValidation.validateCondition(orderOpt.isEmpty(), ErrorCatalog.ORDER_NOT_FOUND);
+        genericValidation.validateCondition(!orderOpt.get().getStatus().equals("PENDIENTE"),
+                ErrorCatalog.ORDER_NOT_PENDING);
 
         UserRoleResponse employeeResponse = iUserWebClientPort.getUserById(employeeId);
         genericValidation.validateCondition(employeeResponse == null, ErrorCatalog.USER_NOT_FOUND);
@@ -193,6 +195,9 @@ public class OrderUseCase implements IOrderServicePort {
     public OrderModel updateStatusOrderToReady(Long orderId, Long employeeId) {
         Optional<OrderModel> orderOpt = iOrderPersistencePort.findById(orderId);
         genericValidation.validateCondition(orderOpt.isEmpty(), ErrorCatalog.ORDER_NOT_FOUND);
+        String currentStatus = orderOpt.get().getStatus();
+        genericValidation.validateCondition(!currentStatus.equals("EN_PREPARACION") && !currentStatus.equals("ENTREGADO"),
+                ErrorCatalog.ORDER_NOT_IN_PREPARATION);
 
         UserRoleResponse employeeResponse = iUserWebClientPort.getUserById(employeeId);
         genericValidation.validateCondition(employeeResponse == null, ErrorCatalog.USER_NOT_FOUND);
@@ -201,8 +206,15 @@ public class OrderUseCase implements IOrderServicePort {
 
 
         OrderModel order = orderOpt.get();
+        
+        // Generar pin de seguridad basado en fecha y hora
+        String securityPin = java.time.LocalDateTime.now().format(
+            java.time.format.DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
+        );
+        
         List<OrderDishModel> orderDishes = iOrderDishPersistencePort.findByOrderId(order.getId());
         order.setStatus("LISTO");
+        order.setSecurityPin(securityPin);
 
         OrderModel updatedOrder = iOrderPersistencePort.save(order);
         List<Long> dishIds = orderDishes.stream()
@@ -231,10 +243,31 @@ public class OrderUseCase implements IOrderServicePort {
             smsNotificationPort
                     .sendOrderReadyNotification("whatsapp:" + clientResponse.getPhone(),
                             order.getId(),
-                            orderDishResponseModel);
+                            orderDishResponseModel,
+                            securityPin);
         }
 
         return updatedOrder;
+    }
+
+    @Override
+    public OrderModel updateStatusOrderToDelivered(Long orderId, Long employeeId, String securityPin) {
+        Optional<OrderModel> orderOpt = iOrderPersistencePort.findById(orderId);
+        genericValidation.validateCondition(orderOpt.isEmpty(), ErrorCatalog.ORDER_NOT_FOUND);
+        genericValidation.validateCondition(!orderOpt.get().getStatus().equals("LISTO"),
+                ErrorCatalog.ORDER_NOT_READY);
+
+        UserRoleResponse employeeResponse = iUserWebClientPort.getUserById(employeeId);
+        genericValidation.validateCondition(employeeResponse == null, ErrorCatalog.USER_NOT_FOUND);
+        genericValidation.validateCondition(!"EMPLOYEE".equals(employeeResponse
+                .getRole().getName()), ErrorCatalog.USER_NOT_EMPLOYEE);
+        
+        OrderModel order = orderOpt.get();
+        genericValidation.validateCondition(!securityPin.equals(order.getSecurityPin()),
+                ErrorCatalog.INVALID_SECURITY_PIN);
+        
+        order.setStatus("ENTREGADO");
+        return iOrderPersistencePort.save(order);
     }
 
     private List<DishModel> validateOrderDishes(OrderModel order) {

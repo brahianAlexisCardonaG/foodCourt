@@ -27,7 +27,11 @@ public enum ErrorCatalog {
     //order
     CLIENT_HAS_ACTIVE_ORDER("ERR_ORDER_001", "Client has an active order in process."),
     DISH_NOT_FROM_RESTAURANT("ERR_ORDER_002", "Dish does not belong to the specified restaurant."),
-    ORDER_NOT_FOUND("ERR_ORDER_003", "The order not found.")
+    ORDER_NOT_FOUND("ERR_ORDER_003", "The order not found."),
+    ORDER_NOT_READY("ERR_ORDER_004", "The order is not ready."),
+    ORDER_NOT_PENDING("ERR_ORDER_005", "The order is not pending."),
+    ORDER_NOT_IN_PREPARATION("ERR_ORDER_006", "The order is not in preparation."),
+    INVALID_SECURITY_PIN("ERR_ORDER_007", "Invalid security pin.")
     ;
 
     private final String code;

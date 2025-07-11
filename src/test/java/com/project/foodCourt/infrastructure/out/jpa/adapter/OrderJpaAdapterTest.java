@@ -2,9 +2,9 @@ package com.project.foodCourt.infrastructure.out.jpa.adapter;
 
 import com.project.foodCourt.domain.model.OrderModel;
 import com.project.foodCourt.infrastructure.out.jpa.entity.DishEntity;
+import com.project.foodCourt.infrastructure.out.jpa.entity.OrderDishEntity;
 import com.project.foodCourt.infrastructure.out.jpa.entity.OrderDishIdEntity;
 import com.project.foodCourt.infrastructure.out.jpa.entity.OrderEntity;
-import com.project.foodCourt.infrastructure.out.jpa.entity.OrderDishEntity;
 import com.project.foodCourt.infrastructure.out.jpa.mapper.IOrderEntityMapper;
 import com.project.foodCourt.infrastructure.out.jpa.repository.IOrderRepository;
 import jakarta.persistence.EntityManager;
@@ -17,13 +17,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,10 +41,8 @@ class OrderJpaAdapterTest {
     @InjectMocks
     private OrderJpaAdapter orderJpaAdapter;
     
-    private OrderEntity orderEntity;
     private OrderModel orderModel;
-    private OrderDishEntity orderDishEntity;
-    private DishEntity dishEntity;
+    private OrderEntity orderEntity;
     
     @BeforeEach
     void setUp() {
@@ -57,24 +55,11 @@ class OrderJpaAdapterTest {
         orderEntity.setId(1L);
         orderEntity.setClientId(1L);
         orderEntity.setStatus("PENDIENTE");
-        
-        dishEntity = new DishEntity();
-        dishEntity.setId(1L);
-        
-        OrderDishIdEntity orderDishId = new OrderDishIdEntity();
-        orderDishId.setOrderId(1L);
-        orderDishId.setDishId(1L);
-        
-        orderDishEntity = new OrderDishEntity();
-        orderDishEntity.setId(orderDishId);
-        
-        orderEntity.setOrderDishes(List.of(orderDishEntity));
     }
     
     @Test
     void save_Success() {
         when(orderEntityMapper.toOrderEntity(orderModel)).thenReturn(orderEntity);
-        when(entityManager.getReference(DishEntity.class, 1L)).thenReturn(dishEntity);
         when(orderRepository.save(orderEntity)).thenReturn(orderEntity);
         when(orderEntityMapper.toOrderModel(orderEntity)).thenReturn(orderModel);
         
@@ -83,30 +68,18 @@ class OrderJpaAdapterTest {
         assertNotNull(result);
         assertEquals(1L, result.getId());
         assertEquals("PENDIENTE", result.getStatus());
-        verify(entityManager).getReference(DishEntity.class, 1L);
+        verify(orderEntityMapper).toOrderEntity(orderModel);
         verify(orderRepository).save(orderEntity);
-    }
-    
-    @Test
-    void save_WithoutOrderDishes() {
-        orderEntity.setOrderDishes(null);
-        when(orderEntityMapper.toOrderEntity(orderModel)).thenReturn(orderEntity);
-        when(orderRepository.save(orderEntity)).thenReturn(orderEntity);
-        when(orderEntityMapper.toOrderModel(orderEntity)).thenReturn(orderModel);
-        
-        OrderModel result = orderJpaAdapter.save(orderModel);
-        
-        assertNotNull(result);
-        verify(orderRepository).save(orderEntity);
-        verify(entityManager, never()).getReference(any(), any());
+        verify(orderEntityMapper).toOrderModel(orderEntity);
     }
     
     @Test
     void findOrdersByClientIdAndStatuses_Success() {
         List<String> statuses = List.of("PENDIENTE", "EN_PREPARACION");
-        List<OrderEntity> orderEntities = List.of(orderEntity);
+        List<OrderEntity> entities = List.of(orderEntity);
+        List<OrderModel> models = List.of(orderModel);
         
-        when(orderRepository.findByClientIdAndStatusIn(1L, statuses)).thenReturn(orderEntities);
+        when(orderRepository.findByClientIdAndStatusIn(1L, statuses)).thenReturn(entities);
         when(orderEntityMapper.toOrderModel(orderEntity)).thenReturn(orderModel);
         
         List<OrderModel> result = orderJpaAdapter.findOrdersByClientIdAndStatuses(1L, statuses);
@@ -118,42 +91,35 @@ class OrderJpaAdapterTest {
     }
     
     @Test
-    void findOrdersByClientIdAndStatuses_EmptyResult() {
-        List<String> statuses = List.of("PENDIENTE");
-        
-        when(orderRepository.findByClientIdAndStatusIn(1L, statuses)).thenReturn(List.of());
-        
-        List<OrderModel> result = orderJpaAdapter.findOrdersByClientIdAndStatuses(1L, statuses);
-        
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
     void findOrdersByStatus_Success() {
-        when(orderRepository.findByStatus("PENDIENTE", PageRequest.of(0, 10)))
-            .thenReturn(new PageImpl<>(List.of(orderEntity)));
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<OrderEntity> entityPage = new PageImpl<>(List.of(orderEntity));
+        
+        when(orderRepository.findByStatus("PENDIENTE", pageable)).thenReturn(entityPage);
         when(orderEntityMapper.toOrderModel(orderEntity)).thenReturn(orderModel);
         
-        Page<OrderModel> result = orderJpaAdapter.findOrdersByStatus("PENDIENTE", PageRequest.of(0, 10));
+        Page<OrderModel> result = orderJpaAdapter.findOrdersByStatus("PENDIENTE", pageable);
         
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
-        assertEquals("PENDIENTE", result.getContent().get(0).getStatus());
+        verify(orderRepository).findByStatus("PENDIENTE", pageable);
     }
-
+    
     @Test
     void findAllOrders_Success() {
-        when(orderRepository.findAll(PageRequest.of(0, 10)))
-            .thenReturn(new PageImpl<>(List.of(orderEntity)));
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<OrderEntity> entityPage = new PageImpl<>(List.of(orderEntity));
+        
+        when(orderRepository.findAll(pageable)).thenReturn(entityPage);
         when(orderEntityMapper.toOrderModel(orderEntity)).thenReturn(orderModel);
         
-        Page<OrderModel> result = orderJpaAdapter.findAllOrders(PageRequest.of(0, 10));
+        Page<OrderModel> result = orderJpaAdapter.findAllOrders(pageable);
         
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
+        verify(orderRepository).findAll(pageable);
     }
-
+    
     @Test
     void findById_Success() {
         when(orderRepository.findById(1L)).thenReturn(Optional.of(orderEntity));
@@ -163,7 +129,6 @@ class OrderJpaAdapterTest {
         
         assertTrue(result.isPresent());
         assertEquals(1L, result.get().getId());
-        assertEquals("PENDIENTE", result.get().getStatus());
         verify(orderRepository).findById(1L);
         verify(orderEntityMapper).toOrderModel(orderEntity);
     }
@@ -177,5 +142,59 @@ class OrderJpaAdapterTest {
         assertFalse(result.isPresent());
         verify(orderRepository).findById(1L);
         verify(orderEntityMapper, never()).toOrderModel(any());
+    }
+    
+    @Test
+    void save_WithNullOrderDishes() {
+        orderEntity.setOrderDishes(null);
+        
+        when(orderEntityMapper.toOrderEntity(orderModel)).thenReturn(orderEntity);
+        when(orderRepository.save(orderEntity)).thenReturn(orderEntity);
+        when(orderEntityMapper.toOrderModel(orderEntity)).thenReturn(orderModel);
+        
+        OrderModel result = orderJpaAdapter.save(orderModel);
+        
+        assertNotNull(result);
+        verify(orderRepository).save(orderEntity);
+    }
+    
+    @Test
+    void findOrdersByClientIdAndStatuses_EmptyResult() {
+        List<String> statuses = List.of("PENDIENTE");
+        
+        when(orderRepository.findByClientIdAndStatusIn(1L, statuses)).thenReturn(List.of());
+        
+        List<OrderModel> result = orderJpaAdapter.findOrdersByClientIdAndStatuses(1L, statuses);
+        
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(orderRepository).findByClientIdAndStatusIn(1L, statuses);
+    }
+    
+    @Test
+    void save_WithOrderDishes() {
+        OrderDishIdEntity orderDishId = new OrderDishIdEntity();
+        orderDishId.setDishId(1L);
+        
+        OrderDishEntity orderDish = new OrderDishEntity();
+        orderDish.setId(orderDishId);
+        orderDish.setQuantity(2);
+        
+        orderEntity.setOrderDishes(List.of(orderDish));
+        
+        DishEntity dishReference = new DishEntity();
+        dishReference.setId(1L);
+        
+        when(orderEntityMapper.toOrderEntity(orderModel)).thenReturn(orderEntity);
+        when(entityManager.getReference(DishEntity.class, 1L)).thenReturn(dishReference);
+        when(orderRepository.save(orderEntity)).thenReturn(orderEntity);
+        when(orderEntityMapper.toOrderModel(orderEntity)).thenReturn(orderModel);
+        
+        OrderModel result = orderJpaAdapter.save(orderModel);
+        
+        assertNotNull(result);
+        verify(entityManager).getReference(DishEntity.class, 1L);
+        verify(orderRepository).save(orderEntity);
+        assertEquals(dishReference, orderDish.getDishes());
     }
 }

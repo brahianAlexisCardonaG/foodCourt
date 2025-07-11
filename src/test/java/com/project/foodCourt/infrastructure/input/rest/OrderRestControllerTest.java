@@ -126,4 +126,23 @@ class OrderRestControllerTest {
         assertEquals("LISTO", result.getBody().getStatus());
         assertEquals(1L, result.getBody().getRestaurantId());
     }
+    
+    @Test
+    void updateStatusOrderToDelivered_Success() {
+        OrderBasicResponseDto deliveredResponse = new OrderBasicResponseDto();
+        deliveredResponse.setId(1L);
+        deliveredResponse.setStatus("ENTREGADO");
+        deliveredResponse.setRestaurantId(1L);
+        
+        when(orderHandler.updateStatusOrderToDelivered(1L, 2L, "123456")).thenReturn(deliveredResponse);
+        
+        ResponseEntity<OrderBasicResponseDto> result = orderRestController.updateStatusOrderToDelivered(1L, 2L, "123456");
+        
+        assertNotNull(result);
+        assertEquals(200, result.getStatusCodeValue());
+        assertNotNull(result.getBody());
+        assertEquals(1L, result.getBody().getId());
+        assertEquals("ENTREGADO", result.getBody().getStatus());
+        assertEquals(1L, result.getBody().getRestaurantId());
+    }
 }

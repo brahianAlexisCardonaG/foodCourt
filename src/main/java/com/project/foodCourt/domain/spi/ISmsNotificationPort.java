@@ -7,5 +7,6 @@ import java.util.List;
 public interface ISmsNotificationPort {
     void sendOrderReadyNotification(String phoneNumber,
                                     Long orderId,
-                                    List<OrderDishResponseModel> orderDishResponseModel);
+                                    List<OrderDishResponseModel> orderDishResponseModel,
+                                    String securityPin);
 }
