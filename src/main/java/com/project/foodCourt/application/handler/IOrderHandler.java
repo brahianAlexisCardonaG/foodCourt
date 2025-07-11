@@ -12,5 +12,6 @@ public interface IOrderHandler {
     Page<OrderResponseDto> getAllOrders(Pageable pageable);
     OrderResponseDto assignedEmployeeIdToOrder(Long orderId, Long employeeId);
     OrderBasicResponseDto updateStatusOrderToReady(Long orderId, Long employeeId);
+    OrderBasicResponseDto updateStatusOrderToDelivered(Long orderId, Long employeeId, String securityPin);
 
 }

@@ -15,6 +15,7 @@ public class OrderModel {
     private String status;
     private Long chefId;
     private Long assignedEmployeeId;
+    private String securityPin;
     private RestaurantBasicModel restaurant;
     private List<OrderDishBasicModel> orderDishes;
 }

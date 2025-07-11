@@ -81,4 +81,17 @@ public class OrderRestController {
     ) {
         return ResponseEntity.ok(iOrderHandler.updateStatusOrderToReady(orderId, employeeId));
     }
+
+    @Operation(summary = "update state order to ENTREGADO")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "update state order to ENTREGADO with success", content = @Content),
+    })
+    @PatchMapping("/state-update-delivered")
+    public ResponseEntity<OrderBasicResponseDto> updateStatusOrderToDelivered(
+            @RequestParam Long orderId,
+            @RequestParam Long employeeId,
+            @RequestParam String securityPin
+    ) {
+        return ResponseEntity.ok(iOrderHandler.updateStatusOrderToDelivered(orderId, employeeId, securityPin));
+    }
 }

@@ -1,6 +1,5 @@
 package com.project.foodCourt.infrastructure.out.jpa.adapter;
 
-import com.project.foodCourt.domain.model.OrderDishModel;
 import com.project.foodCourt.domain.model.OrderModel;
 import com.project.foodCourt.domain.spi.IOrderPersistencePort;
 import com.project.foodCourt.infrastructure.out.jpa.entity.DishEntity;

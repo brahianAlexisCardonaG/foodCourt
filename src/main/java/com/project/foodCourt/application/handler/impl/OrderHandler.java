@@ -55,4 +55,10 @@ public class OrderHandler implements IOrderHandler {
         OrderModel orderModel = iOrderServicePort.updateStatusOrderToReady(orderId, employeeId);
         return iOrderResponseMapper.toOrderBasicResponseDto(orderModel);
     }
+
+    @Override
+    public OrderBasicResponseDto updateStatusOrderToDelivered(Long orderId, Long employeeId, String securityPin ) {
+        OrderModel orderModel = iOrderServicePort.updateStatusOrderToDelivered(orderId, employeeId, securityPin);
+        return iOrderResponseMapper.toOrderBasicResponseDto(orderModel);
+    }
 }

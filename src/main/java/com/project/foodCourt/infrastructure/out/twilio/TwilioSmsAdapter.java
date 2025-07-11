@@ -28,7 +28,8 @@ public class TwilioSmsAdapter implements ISmsNotificationPort {
     @Override
     public void sendOrderReadyNotification(String phoneNumber,
                                            Long orderId,
-                                           List<OrderDishResponseModel> orderDishResponseModel) {
+                                           List<OrderDishResponseModel> orderDishResponseModel,
+                                           String securityPin) {
         try {
             Twilio.init(accountSid, authToken);
             
@@ -38,8 +39,8 @@ public class TwilioSmsAdapter implements ISmsNotificationPort {
             }
             
             String messageBody = String.format(
-                "¡Tu pedido #%d está listo para recoger! 🍽️\n\nPlatos:%s\n\nDirígete al restaurante para retirar tu orden.",
-                orderId, dishesText.toString()
+                "¡Tu pedido #%d está listo para recoger! 🍽️\n\nPlatos:%s\n\nPIN de seguridad: %s\n\nDirígete al restaurante y presenta este PIN para retirar tu orden.",
+                orderId, dishesText.toString(), securityPin
             );
             
             Message message = Message.creator(
